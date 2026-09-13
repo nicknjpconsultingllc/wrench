@@ -262,7 +262,8 @@ WRENCH_COMPOSE_SLOTS=2 vf-eval wrench-compose-env -m <model> -n 8 -r 1 -c 2 -a '
 
 `environments/wrench_compose_env/` mirrors `environments/wrench_factorio`
 in the fork: a `MultiTurnEnv` around `ComposeEpisode` (dataset = kinds x
-seeds, reward = pooled winsorized TR, every other metric at weight 0,
+seeds, reward = floor-adjusted pooled TR where the fire defines a floor, else
+plain pooled winsorized TR; every other metric at weight 0,
 `tr_scoreable` to filter on), so the Hub can host both substrates.
 
 ### Cost and time
