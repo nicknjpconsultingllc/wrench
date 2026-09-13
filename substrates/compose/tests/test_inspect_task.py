@@ -99,3 +99,20 @@ def test_task_dataset_is_kinds_times_seeds():
     assert len(compose_sentinel().dataset) == len(KINDS)
     with pytest.raises(ValueError):
         create_compose_task("meteor_strike")
+
+
+def test_generate_config_per_model():
+    from wrench_compose.inspect_task import MAX_TOKENS, REASONING_TOKENS, generate_config
+
+    assert MAX_TOKENS >= 4096
+    for name in ("openai/gpt-5-mini", "gpt-5.1", "o3-mini", "openai/o4-mini"):
+        cfg = generate_config(name)
+        assert cfg.reasoning_effort == "low" and cfg.reasoning_tokens is None, name
+    for name in ("anthropic/claude-sonnet-4.5", "claude-opus-4.1", "google/gemini-2.5-pro", "gemini-2.5-flash"):
+        cfg = generate_config(name)
+        assert cfg.reasoning_tokens == REASONING_TOKENS and cfg.reasoning_effort is None, name
+    for name in ("model", "operator", "gpt-4.1-mini", "deepseek/deepseek-chat"):
+        cfg = generate_config(name)
+        assert cfg.reasoning_effort is None and cfg.reasoning_tokens is None, name
+    cfg = generate_config("anthropic/claude-sonnet-4.5")
+    assert cfg.max_tokens == MAX_TOKENS > cfg.reasoning_tokens and cfg.max_retries == 5 and cfg.timeout == 180

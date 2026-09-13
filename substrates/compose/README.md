@@ -202,10 +202,12 @@ contract, one class in the middle.
 
 `wrench_compose/inspect_task.py` mirrors `fle/eval/inspect/wrench.py`: the
 solver is Inspect's message/generate loop around `ComposeEpisode` (system
-prompt + the most recent 24 messages per call, `max_tokens` 1024, bounded
-retries), it copies the episode into a `ComposeData` store after every turn,
-and its outer `try/except` records `ComposeData.error` and returns normally,
-so an infrastructure failure is an error row, never a crashed eval. The
+prompt + the most recent 24 messages per call, `max_tokens` 4096 with a
+per-model reasoning cap: `reasoning_effort=low` for OpenAI reasoning models,
+a 1024-token thinking budget for Anthropic/Gemini; bounded retries), it
+copies the episode into a `ComposeData` store after every turn, and four
+consecutive empty completions abandon the episode as an error row instead
+of burning the remaining turns. The
 scorers `throughput_retained` / `recovery` / `detection` are pure readers of
 that store through `episode_metrics` and carry the same value/metadata
 shapes as the fork's (`pooled_numerator` / `pooled_denominator`,

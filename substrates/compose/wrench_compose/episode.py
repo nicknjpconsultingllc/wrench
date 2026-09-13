@@ -621,15 +621,14 @@ class ComposeEpisode:
             raise RuntimeError("episode is over: turn budget spent")
         turn = self.turn
         if not command:
+            self._pace()
             self.feedback = NO_COMMAND_FEEDBACK
             self.actions.append({"turn": turn, "command": None})
             self.drain()
             self.turn += 1
             return self.feedback
 
-        wait = self._last_exec + self.turn_period_s - time.monotonic()
-        if wait > 0:
-            time.sleep(wait)
+        self._pace()
         t = time.monotonic()
         r = self.sandbox.run(command)
         ms = int((time.monotonic() - t) * 1000)
@@ -656,10 +655,11 @@ class ComposeEpisode:
 
     def skip_step(self, feedback: str) -> str:
         """Consume a turn on which no command could be attempted (the model
-        call failed or produced no output). Still drains."""
+        call failed or produced no output). Still drains, still paced."""
         self._require_started()
         if self.is_done:
             raise RuntimeError("episode is over: turn budget spent")
+        self._pace()
         self.feedback = feedback
         self.actions.append({"turn": self.turn, "command": None, "skipped": feedback})
         self.drain()
@@ -672,6 +672,15 @@ class ComposeEpisode:
         self.actions.append({"turn": self.turn, "command": None, "failed": feedback})
         self.turn += 1
         return self.feedback
+
+    def _pace(self) -> None:
+        """Hold every turn to ``turn_period_s``, the no-command and no-output
+        turns included: a model that answers with nothing must not burn its
+        30-turn budget in the first seconds, before the fault has fired."""
+        wait = self._last_exec + self.turn_period_s - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+        self._last_exec = time.monotonic()
 
     # -- probe bookkeeping -------------------------------------------------
 

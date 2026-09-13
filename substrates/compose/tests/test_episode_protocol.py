@@ -28,11 +28,11 @@ def _reset():
 
 
 def make_episode(tmp_path, turns=3, **kw):
+    kw.setdefault("turn_period_s", 0)
     return ComposeEpisode(
         "entity_destruction",
         3,
         turns=turns,
-        turn_period_s=0,
         out_root=tmp_path,
         name="ep",
         stack_factory=FakeStack,
@@ -217,3 +217,41 @@ class TestFinalize:
     def test_system_prompt_carries_the_budget(self, tmp_path):
         text = make_episode(tmp_path, turns=7).system_prompt()
         assert "You have 7 turns" in text and "quota of 400" in text and "2 replicas" in text
+
+
+class TestPacing:
+    """Every turn holds ``turn_period_s``, the no-command and skipped turns
+    included, so a model that answers with nothing cannot burn its budget
+    before the fault fires."""
+
+    @pytest.fixture
+    def clock(self, monkeypatch):
+        from types import SimpleNamespace
+
+        from wrench_compose import episode as episode_module
+
+        state = SimpleNamespace(now=1000.0, slept=[])
+
+        def sleep(s):
+            state.slept.append(round(s, 3))
+            state.now += s
+
+        monkeypatch.setattr(
+            episode_module, "time", SimpleNamespace(monotonic=lambda: state.now, sleep=sleep, time=lambda: 0.0)
+        )
+        return state
+
+    def test_no_command_turn_is_paced(self, tmp_path, clock):
+        ep = make_episode(tmp_path, turns=5, turn_period_s=6.0).start()
+        ep.step("wrenchctl ps")
+        ep.step(None)
+        assert clock.slept == [6.0]
+        ep.step("wrenchctl ps")
+        assert clock.slept == [6.0, 6.0]
+
+    def test_skipped_turn_is_paced(self, tmp_path, clock):
+        ep = make_episode(tmp_path, turns=5, turn_period_s=6.0).start()
+        ep.step("wrenchctl ps")
+        ep.skip_step("no output")
+        ep.skip_step("no output")
+        assert clock.slept == [6.0, 6.0]
