@@ -121,3 +121,48 @@ def test_no_fire_is_an_error_row_not_a_zero_fire_success(tmp_path):
     assert sample.error is not None and "not_applicable" in sample.error.message
     assert "not_applicable" in sample.store["ComposeData:error"]
     assert FakeStack.instances[0].down_called == 1
+
+
+class SlowUpStack(FakeStack):
+    """``up()`` takes long enough for the test to cancel the sample mid-start."""
+
+    def up(self):
+        import time
+
+        time.sleep(0.3)
+        super().up()
+
+
+def test_cancelled_sample_still_tears_down_and_releases_the_slot(monkeypatch):
+    import anyio
+    from inspect_ai.model import ModelName
+    from inspect_ai.solver import TaskState
+
+    from wrench_compose import slots
+    from wrench_compose.inspect_task import compose_solver
+
+    monkeypatch.setenv(slots.SLOTS_ENV, "1")
+    slots._POOL = None
+    factory = EpisodeRecorder(stack_factory=SlowUpStack)
+    solve = compose_solver(turns=2, turn_period_s=0, episode_factory=factory)
+
+    async def main():
+        pool = await slots.slot_pool()
+        state = TaskState(
+            model=ModelName("mockllm/model"),
+            sample_id="belt_cut_seed1",
+            epoch=0,
+            input="",
+            messages=[],
+            metadata={"kind": "belt_cut", "seed": 1},
+        )
+        async with anyio.create_task_group() as tg:
+            tg.start_soon(solve, state, None)
+            await anyio.sleep(0.05)
+            tg.cancel_scope.cancel()
+        return pool
+
+    pool = anyio.run(main)
+    assert pool.available == 1, "cancelled sample leaked its slot"
+    (episode,) = factory.episodes
+    assert FakeStack.instances[0].down_called == 1

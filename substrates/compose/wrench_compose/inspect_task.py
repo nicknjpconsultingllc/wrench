@@ -27,6 +27,7 @@ import re
 import traceback
 from collections.abc import Callable
 
+import anyio
 from inspect_ai import Task, task
 from inspect_ai.dataset import Sample
 from inspect_ai.model import (
@@ -227,13 +228,18 @@ def compose_solver(
                 _sync_store(data, episode)
             state.output = ModelOutput(completion=f"Error in WRENCH compose episode: {e}", model="unknown")
         finally:
-            if episode is not None:
-                await asyncio.to_thread(episode.cleanup)
-            if slot is not None:
-                try:
-                    await (await slot_pool()).release(slot)
-                except Exception as release_err:  # noqa: BLE001
-                    logger.error(f"error releasing slot {slot}: {release_err}")
+            # Inspect cancels samples through anyio cancel scopes (time
+            # limits, Ctrl-C, fail-fast); inside a cancelled scope every
+            # await raises again, so an unshielded teardown would skip the
+            # release and leak the slot for the rest of the run.
+            with anyio.CancelScope(shield=True):
+                if episode is not None:
+                    await asyncio.to_thread(episode.cleanup)
+                if slot is not None:
+                    try:
+                        await (await slot_pool()).release(slot)
+                    except Exception as release_err:  # noqa: BLE001
+                        logger.error(f"error releasing slot {slot}: {release_err}")
         if data.error:
             # Re-raise after the cleanup so Inspect records ``sample.error``
             # and ``retry_on_error`` gets another attempt; ``fail_on_error=False``
