@@ -38,7 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from wrench_core.metrics import episode_metrics
-from wrench_core.scoring import winsorize_tr
+from wrench_core.scoring import DETECTION_PRECISION_FLOOR, winsorize_tr
 from wrench_core.survival import pooled_time_to_recovery
 
 from wrench_compose.kinds import KINDS, parse_kinds, parse_seeds
@@ -171,6 +171,18 @@ def collect_episode_rows(logs):
     return rows
 
 
+def pooled_recall(matched_fires, num_fires, precision, floor=DETECTION_PRECISION_FLOOR):
+    """Pooled detection recall with the per-episode gate of
+    ``wrench_core.scoring.detection_metrics`` applied to the pooled loose
+    precision: below ``floor`` the group's recall is 0. None (rendered
+    ``-``) when the group has no fires: nothing was there to detect."""
+    if not num_fires:
+        return None
+    if precision < floor:
+        return 0.0
+    return matched_fires / num_fires
+
+
 def aggregate_rows(rows):
     """Pooled per-(model, kind) aggregates: sum numerators / sum denominators,
     plus the Kaplan-Meier time-to-recovery over the group's fires."""
@@ -196,6 +208,8 @@ def aggregate_rows(rows):
         num_fires = sum(e["num_fires"] for e in ok)
         latencies = [lat for e in ok for lat in e["detection_latencies"]]
         ttr = pooled_time_to_recovery([e["ttr"] for e in ok if e.get("ttr")])
+        precision = matched_reports / num_reports if num_reports else 1.0
+        recall = pooled_recall(matched_fires, num_fires, precision)
         aggregates.append(
             {
                 "model": model,
@@ -215,8 +229,8 @@ def aggregate_rows(rows):
                 "recovery_rate": recovered / scoreable if scoreable else None,
                 "recovered": recovered,
                 "scoreable_fires": scoreable,
-                "detection_recall": (matched_fires / num_fires if num_fires else 1.0),
-                "detection_precision": (matched_reports / num_reports if num_reports else 1.0),
+                "detection_recall": recall,
+                "detection_precision": precision,
                 "detection_precision_strict": (matched_strict / num_reports if num_reports else 1.0),
                 "mean_detection_latency_ticks": (sum(latencies) / len(latencies) if latencies else None),
                 "ttr_km_median_ticks": ttr["median_ticks"] if ttr else None,
@@ -245,6 +259,9 @@ def write_markdown(path: Path, aggregates, rows, args):
         "headline metric; TR (raw) is the same pooled ratio before the clamp.",
         "TR (floor-adj) subtracts the passive-redundancy floor (entity_destruction and",
         "adaptive_strike fires carrying same_type_total) from numerator and denominator.",
+        "Det. recall is pooled matched fires / fires, gated to 0 when the pooled",
+        f"loose precision is below {DETECTION_PRECISION_FLOOR} (the per-episode gate, applied to the pool);",
+        "`-` when the group had no fires.",
         "TTR median is the Kaplan-Meier median time to sustained recovery in ms",
         "over the group's fires (censored fires stay at risk until the window",
         "end; `-` when fewer than half recovered).",
