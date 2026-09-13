@@ -12,12 +12,12 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
-from wrench_compose.signing import sign
+from wrench_compose.signing import read_secret, sign
 
 GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://gateway:8000")
 RPS = float(os.environ.get("RPS", "8"))
 SEED = int(os.environ.get("SEED", "1"))
-KEY = os.environ.get("HMAC_KEY", "dev-key").encode()
+KEY = read_secret(os.environ.get("HMAC_KEY_FILE", "/run/secrets/hmac_key"))
 
 u = urlparse(GATEWAY_URL)
 NS = uuid.uuid5(uuid.NAMESPACE_URL, f"wrench-loadgen-{SEED}")

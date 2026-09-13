@@ -19,13 +19,14 @@ import redis
 from wrench_compose.arming import Scheduler, Spec, trailing_rate
 from wrench_compose.httpjson import HttpError, get, post, serve
 from wrench_compose.positions import position_of
-from wrench_compose.signing import verify
+from wrench_compose.signing import read_secret, verify
 
 PG_DSN = os.environ["PG_DSN"]
 REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://gateway:8000")
-KEY = os.environ.get("HMAC_KEY", "dev-key").encode()
+KEY = read_secret(os.environ.get("HMAC_KEY_FILE", "/run/secrets/hmac_key"))
 CHAOS_URL = os.environ.get("CHAOS_URL", "http://chaos:8080")
+BIND = os.environ.get("BIND", "0.0.0.0")  # the admin-network address; the factory never sees this server
 SAMPLE_MS = int(os.environ.get("SAMPLE_MS", "500"))
 ITEM = os.environ.get("ITEM", "jobs_done")
 INFLIGHT_WINDOW_SAMPLES = 20  # 10 s at 500 ms
@@ -211,9 +212,6 @@ class Probe:
             "resolved": resolved,
         }
 
-    def public_metrics(self, _q, _b):
-        return 200, {"tick": tick(), "jobs_done": self.counter.verified, "rate_per_min": self.rate()}
-
     def samples(self, _q, _b):
         with self.lock:
             return 200, list(self.sched.samples)
@@ -273,15 +271,15 @@ def main():
         8080,
         {
             ("GET", "/status"): p.status,
-            ("GET", "/public_metrics"): p.public_metrics,
             ("GET", "/samples"): p.samples,
             ("GET", "/ledger"): p.get_ledger,
             ("POST", "/arm"): p.arm,
             ("POST", "/fire_now"): p.fire_now,
             ("POST", "/ledger"): p.append_ledger,
         },
+        host=BIND,
     )
-    print(f"probe up; sampling every {SAMPLE_MS} ms", flush=True)
+    print(f"probe up on {BIND}:8080; sampling every {SAMPLE_MS} ms", flush=True)
     p.loop()
 
 

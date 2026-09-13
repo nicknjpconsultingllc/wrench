@@ -1,7 +1,10 @@
-# The agent-visible factory: gateway -> redis stream -> worker xN -> postgres.
+# The agent-visible factory: gateway -> redis stream -> worker xN -> postgres,
+# plus the `agent` sandbox that holds wrenchctl and nothing else.
 # restart: "no" everywhere so nothing self-heals; the agent has to.
 # Workers reach redis through `netproxy` (a Toxiproxy in the admin project,
 # attached to this network) so belt_cut can degrade exactly that hop.
+# The network has a fixed subnet so the admin project can give the agent API
+# listener a static address on it (10.232.<slot>.20, alias `wrenchapi`).
 name: ${WRENCH_FACTORY_PROJECT:-wrench-factory-0}
 
 x-factory: &factory
@@ -76,8 +79,9 @@ services:
       REDIS_URL: redis://netproxy:6379/0
       PG_DSN: postgresql://worker:worker@postgres:5432/factory
       WORK_ITERS: ${WRENCH_WORK_ITERS:-1000000}
-      WORK_MODE: ${WRENCH_WORK_MODE:-iters}
+      WORK_MODE: ${WRENCH_WORK_MODE:-cputime}
       WORK_CPU_MS: ${WRENCH_WORK_CPU_MS:-195}
+      METRICS_PORT: "8000"
     labels:
       wrench.role: factory
       wrench.service: worker
@@ -88,6 +92,28 @@ services:
         # never reaches 2 CPUs, so CFS throttling never adds jitter.
         limits: { cpus: "2.0", memory: 256M }
 
+  # The sandbox. Not a factory service (wrench.role=agent), so the agent API
+  # does not list it and cannot exec into, restart or scale it. No docker
+  # socket, no secrets, read-only root, unprivileged, factory network only.
+  agent:
+    <<: *factory
+    image: ${WRENCH_AGENT_IMAGE:-wrench-agent:local}
+    environment:
+      WRENCH_AGENT_API: http://wrenchapi:8081
+    labels:
+      wrench.role: agent
+    user: "10001:10001"
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 64M, pids: 64 }
+
 networks:
   factory:
     name: ${WRENCH_FACTORY_NET:-wrench_factory_0}
+    ipam:
+      config:
+        - subnet: 10.232.${WRENCH_SLOT:-0}.0/24

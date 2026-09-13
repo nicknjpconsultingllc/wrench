@@ -180,7 +180,7 @@ def main(argv=None):
     j.add_argument("--agent", default="noop")
     j.add_argument("--stamp", default=None)
     j.add_argument("--slot", type=int, default=0)
-    j.add_argument("--work-mode", default="iters", choices=["iters", "cputime"])
+    j.add_argument("--work-mode", default="cputime", choices=["iters", "cputime"])
     j.add_argument("--image", default="wrench-svc:local")
     j.set_defaults(fn=cmd_jitter)
     f = sub.add_parser("floor")
