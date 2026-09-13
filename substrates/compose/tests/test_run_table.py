@@ -199,3 +199,20 @@ def test_markdown_table(tmp_path):
     text = path.read_text()
     assert "| m | belt_cut | 1/2 | 1 | 0.500 |" in text
     assert "| m | belt_cut | 3 | error |" in text and "| x |" in text
+
+
+def test_main_passes_retry_on_error_to_eval_set(tmp_path, monkeypatch):
+    import inspect_ai
+
+    calls = {}
+
+    def fake_eval_set(**kwargs):
+        calls.update(kwargs)
+        return True, []
+
+    monkeypatch.setattr(inspect_ai, "eval_set", fake_eval_set)
+    monkeypatch.setattr(
+        sys, "argv", ["run_table.py", "--models", "mockllm/model", "--kinds", "belt_cut", "--outdir", str(tmp_path)]
+    )
+    rt.main()
+    assert calls["retry_on_error"] == rt.RETRY_ON_ERROR == 2 and calls["fail_on_error"] is False

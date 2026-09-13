@@ -136,6 +136,9 @@ def compose_solver(
     Mirrors the Factorio solver: the outer try/except records
     ``ComposeData.error``, the slot is released in ``finally``, and every
     turn-level failure consumes a turn instead of aborting the episode.
+    Unlike the Factorio solver it then re-raises, so an infrastructure
+    failure is ``sample.error`` (retried by ``retry_on_error``), never a
+    0-fire "success".
     ``NO_OUTPUT_TURNS`` consecutive empty completions abandon the episode
     (``NoOutputError``) rather than burning the remaining turns.
     ``episode_factory`` exists for the unit tests (no Docker).
@@ -231,6 +234,11 @@ def compose_solver(
                     await (await slot_pool()).release(slot)
                 except Exception as release_err:  # noqa: BLE001
                     logger.error(f"error releasing slot {slot}: {release_err}")
+        if data.error:
+            # Re-raise after the cleanup so Inspect records ``sample.error``
+            # and ``retry_on_error`` gets another attempt; ``fail_on_error=False``
+            # keeps the rest of the eval running.
+            raise EpisodeError(data.error)
         return state
 
     return solve

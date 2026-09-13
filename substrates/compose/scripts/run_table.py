@@ -14,10 +14,10 @@ Time-to-recovery is pooled through ``wrench_core.survival``: the per-fire
 Kaplan-Meier and the table shows the KM median per (model, kind).
 
 An episode counts as an error row when ``sample.error`` is set OR the
-``ComposeData:error`` store field is non-empty: the solver's own
-try/except returns normally after an infrastructure failure (a slot that
-never came up, a probe that never fired), so ``sample.error`` alone would
-report such an episode as a genuine 0-fire success.
+``ComposeData:error`` store field is non-empty. The solver re-raises after
+an infrastructure failure (a slot that never came up, a probe that never
+fired), so ``sample.error`` is set and ``retry_on_error`` retries the
+episode; the store check stays as belt and braces.
 
 Usage:
     python scripts/run_table.py --models openrouter/anthropic/claude-sonnet-4.5,openrouter/openai/gpt-5-mini \\
@@ -49,6 +49,9 @@ TR_SCORER = "throughput_retained"
 RECOVERY_SCORER = "recovery"
 DETECTION_SCORER = "detection"
 STORE_PREFIX = "ComposeData:"
+# Extra attempts per episode whose solver raised (stack never came up, no
+# fire, model went silent) before it stands as an error row.
+RETRY_ON_ERROR = 2
 
 
 def _num(value):
@@ -355,6 +358,7 @@ def main():
         max_connections=args.max_connections,
         max_samples=args.max_samples or configured_slots(),
         fail_on_error=False,
+        retry_on_error=RETRY_ON_ERROR,
     )
     success, logs = eval_set(**eval_kwargs)
     if not success:

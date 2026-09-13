@@ -76,3 +76,33 @@ def test_an_empty_completion_streak_resets_on_output(tmp_path):
     (episode,) = factory.episodes
     assert sample.store["ComposeData:error"] == "" and episode.turn == len(outputs)
     assert episode.steps_completed == 2
+
+
+class FlakyStack(FakeStack):
+    """``up()`` fails on the first stack built in the process, then works."""
+
+    failures = 1
+
+    def up(self):
+        if FlakyStack.failures > 0:
+            FlakyStack.failures -= 1
+            raise RuntimeError("compose up failed: network 10.232.0.0/24 in use")
+        super().up()
+
+
+def test_store_error_becomes_sample_error_and_is_retried(tmp_path):
+    FlakyStack.failures = 1
+    factory = EpisodeRecorder(stack_factory=FlakyStack)
+    sample = run_task(tmp_path, [COMMAND] * 6, factory, turns=3, retry_on_error=1)
+    assert len(factory.episodes) == 2  # first attempt raised, retry_on_error ran a second
+    assert sample.error is None and sample.store["ComposeData:error"] == ""
+    assert sample.scores["throughput_retained"].value == pytest.approx(0.5, abs=0.02)
+
+
+def test_store_error_without_retry_is_sample_error(tmp_path):
+    FlakyStack.failures = 1
+    factory = EpisodeRecorder(stack_factory=FlakyStack)
+    sample = run_task(tmp_path, [COMMAND] * 3, factory, turns=3)
+    assert len(factory.episodes) == 1
+    assert sample.error is not None and "compose up failed" in sample.error.message
+    assert "compose up failed" in sample.store["ComposeData:error"]
