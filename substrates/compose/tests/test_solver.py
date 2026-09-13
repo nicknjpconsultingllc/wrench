@@ -106,3 +106,18 @@ def test_store_error_without_retry_is_sample_error(tmp_path):
     assert len(factory.episodes) == 1
     assert sample.error is not None and "compose up failed" in sample.error.message
     assert "compose up failed" in sample.store["ComposeData:error"]
+
+
+class NotApplicableStack(FakeStack):
+    def _fire(self):
+        if self._tick < self.fire_tick:
+            return None
+        return {"tick": self.fire_tick, "event": "not_applicable", "kind": self.kind, "seed": self.seed, "detail": {}}
+
+
+def test_no_fire_is_an_error_row_not_a_zero_fire_success(tmp_path):
+    factory = EpisodeRecorder(stack_factory=NotApplicableStack)
+    sample = run_task(tmp_path, [COMMAND] * 2, factory, turns=2)
+    assert sample.error is not None and "not_applicable" in sample.error.message
+    assert "not_applicable" in sample.store["ComposeData:error"]
+    assert FakeStack.instances[0].down_called == 1

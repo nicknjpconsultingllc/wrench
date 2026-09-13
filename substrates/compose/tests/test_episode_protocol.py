@@ -29,13 +29,13 @@ def _reset():
 
 def make_episode(tmp_path, turns=3, **kw):
     kw.setdefault("turn_period_s", 0)
+    kw.setdefault("stack_factory", FakeStack)
     return ComposeEpisode(
         "entity_destruction",
         3,
         turns=turns,
         out_root=tmp_path,
         name="ep",
-        stack_factory=FakeStack,
         sandbox_factory=FakeSandbox,
         **kw,
     )
@@ -255,3 +255,44 @@ class TestPacing:
         ep.skip_step("no output")
         ep.skip_step("no output")
         assert clock.slept == [6.0, 6.0]
+
+
+class NotApplicableStack(FakeStack):
+    """The spec resolves to ``not_applicable`` instead of firing."""
+
+    def _fire(self):
+        if self._tick < self.fire_tick:
+            return None
+        return {
+            "tick": self.fire_tick,
+            "event": "not_applicable",
+            "kind": self.kind,
+            "seed": self.seed,
+            "affected": [],
+            "detail": {"error": "no holder carried any flow in the window"},
+        }
+
+
+class TestNoFire:
+    def test_not_applicable_is_an_episode_error_naming_the_event(self, tmp_path):
+        ep = make_episode(tmp_path, turns=1, stack_factory=NotApplicableStack).start()
+        ep.step("wrenchctl ps")
+        with pytest.raises(EpisodeError, match="not_applicable") as info:
+            ep.finalize()
+        assert "no holder carried any flow" in str(info.value)
+        assert ep.fires == []
+
+    def test_failed_terminal_event_in_the_ledger(self, tmp_path):
+        ep = make_episode(tmp_path, turns=1).start()
+        stack = FakeStack.instances[0]
+        failed = {
+            "tick": 61000,
+            "event": "failed",
+            "kind": "belt_cut",
+            "seed": 3,
+            "detail": {"error": "toxiproxy refused"},
+        }
+        stack.wait_resolved = lambda timeout_s: failed
+        stack.ledger = lambda: [{"tick": 1000, "event": "armed", "kind": "belt_cut", "seed": 3}, failed]
+        with pytest.raises(EpisodeError, match="'failed'"):
+            ep.finalize()

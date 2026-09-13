@@ -727,13 +727,19 @@ class ComposeEpisode:
     def run_to_window_end(self) -> None:
         """Wait for the fire (the spec arms on demonstrated throughput) and
         then for the post-fire window to close. Raises ``EpisodeError``
-        when nothing fires within the fire timeout: an episode with no
-        fire is a broken episode, not a good agent."""
+        when nothing fires within the fire timeout or the spec resolved to
+        ``failed`` / ``not_applicable``: an episode with no fire is a broken
+        episode, not a good agent, and must never score as a 0-fire success."""
         self._require_started()
         if self.fired is None:
             self.fired = self.stack.wait_resolved(float(self.cfg["fire_timeout_s"]))
-        if self.fired["event"] == "fired":
-            self.stack.wait_tick(self.window_end_tick)
+        if self.fired["event"] != "fired":
+            detail = self.fired.get("detail") or {}
+            raise EpisodeError(
+                f"fault did not fire: the spec resolved to {self.fired['event']!r} "
+                f"at tick {self.fired.get('tick')} ({detail.get('error') or detail or 'no detail'})"
+            )
+        self.stack.wait_tick(self.window_end_tick)
 
     def finalize(self) -> dict[str, Any]:
         """Run to the window end, final drain, compute every metric, write
@@ -745,6 +751,9 @@ class ComposeEpisode:
                 self.run_to_window_end()
             finally:
                 self.drain()
+            if not self.fires:
+                terminal = next((e for e in self.ledger_events if e.get("event") in ("not_applicable", "failed")), None)
+                raise EpisodeError(f"no fired event in the ledger; terminal event: {terminal or 'none'}")
             try:
                 self.end_tick = self.stack.tick()
             except Exception as tick_err:  # noqa: BLE001
