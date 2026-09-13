@@ -199,3 +199,49 @@ def test_markdown_table(tmp_path):
     text = path.read_text()
     assert "| m | belt_cut | 1/2 | 1 | 0.500 |" in text
     assert "| m | belt_cut | 3 | error |" in text and "| x |" in text
+
+
+def test_main_passes_retry_on_error_to_eval_set(tmp_path, monkeypatch):
+    import inspect_ai
+
+    calls = {}
+
+    def fake_eval_set(**kwargs):
+        calls.update(kwargs)
+        return True, []
+
+    monkeypatch.setattr(inspect_ai, "eval_set", fake_eval_set)
+    monkeypatch.setattr(
+        sys, "argv", ["run_table.py", "--models", "mockllm/model", "--kinds", "belt_cut", "--outdir", str(tmp_path)]
+    )
+    rt.main()
+    assert calls["retry_on_error"] == rt.RETRY_ON_ERROR == 2 and calls["fail_on_error"] is False
+
+
+def test_pooled_recall_is_gated_by_pooled_precision():
+    # Each episode: 1 matched report out of 4 (precision 0.25 < 0.5), fire matched.
+    logs = [
+        fake_log(
+            "m",
+            "belt_cut",
+            [fake_sample("belt_cut", 1, reports=(1, 1, 4)), fake_sample("belt_cut", 3, reports=(1, 1, 4))],
+        ),
+        fake_log("precise", "belt_cut", [fake_sample("belt_cut", 1, reports=(1, 1, 2))]),
+    ]
+    agg = {a["model"]: a for a in rt.aggregate_rows(rt.collect_episode_rows(logs))}
+    assert agg["m"]["detection_precision"] == pytest.approx(0.25)
+    assert agg["m"]["detection_recall"] == 0.0  # 2/2 fires matched, but the spam gate holds
+    assert agg["precise"]["detection_precision"] == 0.5 and agg["precise"]["detection_recall"] == 1.0
+    assert rt.pooled_recall(2, 2, 0.49) == 0.0 and rt.pooled_recall(1, 2, 0.5) == 0.5
+
+
+def test_zero_fire_group_renders_recall_as_dash(tmp_path):
+    logs = [fake_log("m", "belt_cut", [fake_sample("belt_cut", 1, store_error="never armed")])]
+    rows = rt.collect_episode_rows(logs)
+    (agg,) = rt.aggregate_rows(rows)
+    assert agg["fires"] == 0 and agg["detection_recall"] is None
+    path = tmp_path / "results.md"
+    rt.write_markdown(path, [agg], rows, SimpleNamespace(models=["m"], kind_list=["belt_cut"], seed_list=[1], turns=5))
+    line = next(ln for ln in path.read_text().splitlines() if ln.startswith("| m | belt_cut | 0/1 |"))
+    cells = [c.strip() for c in line.strip("|").split("|")]
+    assert cells[9] == "-"  # Det. recall

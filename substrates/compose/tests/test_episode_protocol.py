@@ -28,14 +28,14 @@ def _reset():
 
 
 def make_episode(tmp_path, turns=3, **kw):
+    kw.setdefault("turn_period_s", 0)
+    kw.setdefault("stack_factory", FakeStack)
     return ComposeEpisode(
         "entity_destruction",
         3,
         turns=turns,
-        turn_period_s=0,
         out_root=tmp_path,
         name="ep",
-        stack_factory=FakeStack,
         sandbox_factory=FakeSandbox,
         **kw,
     )
@@ -217,3 +217,95 @@ class TestFinalize:
     def test_system_prompt_carries_the_budget(self, tmp_path):
         text = make_episode(tmp_path, turns=7).system_prompt()
         assert "You have 7 turns" in text and "quota of 400" in text and "2 replicas" in text
+
+
+class TestPacing:
+    """Every turn holds ``turn_period_s``, the no-command and skipped turns
+    included, so a model that answers with nothing cannot burn its budget
+    before the fault fires."""
+
+    @pytest.fixture
+    def clock(self, monkeypatch):
+        from types import SimpleNamespace
+
+        from wrench_compose import episode as episode_module
+
+        state = SimpleNamespace(now=1000.0, slept=[])
+
+        def sleep(s):
+            state.slept.append(round(s, 3))
+            state.now += s
+
+        monkeypatch.setattr(
+            episode_module, "time", SimpleNamespace(monotonic=lambda: state.now, sleep=sleep, time=lambda: 0.0)
+        )
+        return state
+
+    def test_no_command_turn_is_paced(self, tmp_path, clock):
+        ep = make_episode(tmp_path, turns=5, turn_period_s=6.0).start()
+        ep.step("wrenchctl ps")
+        ep.step(None)
+        assert clock.slept == [6.0]
+        ep.step("wrenchctl ps")
+        assert clock.slept == [6.0, 6.0]
+
+    def test_skipped_turn_is_paced(self, tmp_path, clock):
+        ep = make_episode(tmp_path, turns=5, turn_period_s=6.0).start()
+        ep.step("wrenchctl ps")
+        ep.skip_step("no output")
+        ep.skip_step("no output")
+        assert clock.slept == [6.0, 6.0]
+
+
+class NotApplicableStack(FakeStack):
+    """The spec resolves to ``not_applicable`` instead of firing."""
+
+    def _fire(self):
+        if self._tick < self.fire_tick:
+            return None
+        return {
+            "tick": self.fire_tick,
+            "event": "not_applicable",
+            "kind": self.kind,
+            "seed": self.seed,
+            "affected": [],
+            "detail": {"error": "no holder carried any flow in the window"},
+        }
+
+
+class TestNoFire:
+    def test_not_applicable_is_an_episode_error_naming_the_event(self, tmp_path):
+        ep = make_episode(tmp_path, turns=1, stack_factory=NotApplicableStack).start()
+        ep.step("wrenchctl ps")
+        with pytest.raises(EpisodeError, match="not_applicable") as info:
+            ep.finalize()
+        assert "no holder carried any flow" in str(info.value)
+        assert ep.fires == []
+
+    def test_failed_terminal_event_in_the_ledger(self, tmp_path):
+        ep = make_episode(tmp_path, turns=1).start()
+        stack = FakeStack.instances[0]
+        failed = {
+            "tick": 61000,
+            "event": "failed",
+            "kind": "belt_cut",
+            "seed": 3,
+            "detail": {"error": "toxiproxy refused"},
+        }
+        stack.wait_resolved = lambda timeout_s: failed
+        stack.ledger = lambda: [{"tick": 1000, "event": "armed", "kind": "belt_cut", "seed": 3}, failed]
+        with pytest.raises(EpisodeError, match="'failed'"):
+            ep.finalize()
+
+
+class TestComposeArgv:
+    def test_project_is_explicit_per_slot(self, tmp_path):
+        from wrench_compose.episode import COMPOSE, compose_argv, default_config, slot_env
+
+        env = slot_env(1, default_config(seed=1), tmp_path)
+        env["COMPOSE_PROJECT_NAME"] = "stray-host-project"
+        argv = compose_argv(env, "factory.yml", "up", "-d")
+        assert argv == ["docker", "compose", "-f", str(COMPOSE / "factory.yml"), "-p", "wrench-factory-1", "up", "-d"]
+        argv = compose_argv(env, "admin.yml", "down", "-v")
+        assert argv[argv.index("-p") + 1] == "wrench-admin-1" and argv[-2:] == ["down", "-v"]
+        assert compose_argv(slot_env(0, default_config(seed=1), tmp_path), "factory.yml")[5] == "wrench-factory-0"

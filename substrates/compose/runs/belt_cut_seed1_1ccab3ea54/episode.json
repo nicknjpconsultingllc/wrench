@@ -1,0 +1,34 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240.0,
+    "name": "belt_cut_seed1_1ccab3ea54",
+    "kind": "belt_cut",
+    "seed": 1,
+    "agent": "llm",
+    "params": {},
+    "slot": 0
+  },
+  "timing": {
+    "t_start": 1789277559.787049,
+    "t_end": 1789277559.835368,
+    "wall_s": 0.0
+  },
+  "error": null,
+  "fired": null,
+  "agent_actions": [],
+  "scores": null,
+  "metrics": null
+}

@@ -243,8 +243,9 @@ def test_load_environment_defaults():
     assert isinstance(env.rubric, vf.RubricGroup)
     wrench_rubric = env.rubric.rubrics[0]
     names = wrench_rubric._get_reward_func_names()
-    assert names[0] == "throughput_retained" and wrench_rubric.weights[0] == 1.0
+    assert names[0] == "throughput_retained_reward" and wrench_rubric.weights[0] == 1.0
     assert set(wrench_rubric.weights[1:]) == {0.0}
+    assert "throughput_retained" in names and "throughput_retained_floor_adj" in names
     assert "detection_precision_strict" in names and "quota_met" in names and "command_rate" in names
 
 
@@ -284,8 +285,9 @@ def test_turn_parsing_and_completion():
     assert roles == ["assistant", "user"] * 3
     assert "Episode complete" in state["completion"][-1].content
 
-    assert state["reward"] == pytest.approx(0.73)
+    assert state["reward"] == pytest.approx(0.55)  # floor-adjusted TR when the fire defines one
     m = state["metrics"]
+    assert m["throughput_retained_reward"] == pytest.approx(0.55)
     assert m["throughput_retained"] == pytest.approx(0.73)
     assert m["throughput_retained_floor_adj"] == pytest.approx(0.55)
     assert m["tr_scoreable"] == 1.0 and m["tr_pooled_denominator"] == 200.0
@@ -345,3 +347,13 @@ def test_context_window_trims_like_the_inspect_harness():
         assert [m.role for m in prompt[1:]] == ["user", "assistant", "user"]
     assert "observation for turn 2/5" in client.prompts[2][1].content
     assert len(state["completion"]) == 10
+
+
+def test_reward_falls_back_to_plain_tr_without_a_floor():
+    metrics = dict(CANNED_RESULT["metrics"], throughput_retained_floor_adj=None)
+    state = {"wrench": dict(CANNED_RESULT, metrics=metrics)}
+    assert wce.throughput_retained_reward(state) == pytest.approx(0.73)
+    assert wce.throughput_retained_floor_adj(state) == 0.0
+    assert wce.throughput_retained_reward({"wrench": None}) == 0.0
+    spof = dict(CANNED_RESULT["metrics"], throughput_retained_floor_adj=0.73)  # floor 0: same as plain
+    assert wce.throughput_retained_reward({"wrench": dict(CANNED_RESULT, metrics=spof)}) == pytest.approx(0.73)

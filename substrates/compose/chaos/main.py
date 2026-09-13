@@ -27,8 +27,8 @@ import redis
 
 from wrench_compose.allowlist import COMPOSE_PROJECT_LABEL, is_agent_visible, service_of
 from wrench_compose.httpjson import HttpError, get, post, serve
+from wrench_compose.manifest import belt_cut_affected, service_entry
 from wrench_compose.pick import load_bearing, pick_adaptive, pick_seeded
-from wrench_compose.positions import position_of
 
 FACTORY_PROJECT = os.environ["FACTORY_PROJECT"]
 FACTORY_NET = os.environ["FACTORY_NET"]
@@ -176,9 +176,7 @@ def hog_dsn() -> str:
 
 # ---------------------------------------------------------------- faults
 def manifest_entry(c, **extra) -> dict:
-    svc = service_of(c.labels)
-    x, y = position_of(svc)
-    return {"service": svc, "container": c.name, "x": x, "y": y, **extra}
+    return service_entry(service_of(c.labels), c.name, **extra)
 
 
 def fire_entity_destruction(seed: int, params: dict):
@@ -225,7 +223,7 @@ def fire_belt_cut(seed: int, params: dict):
         )
         for w in workers
     ]
-    return entries, None, False
+    return belt_cut_affected(entries, toxic), None, False
 
 
 def fire_resource_exhaustion(seed: int, params: dict):
@@ -257,6 +255,8 @@ def fire_resource_exhaustion(seed: int, params: dict):
             if held > 0:
                 break
         time.sleep(0.1)
+    # same_type_total is informational here: nothing is destroyed, so the
+    # scorer applies no redundancy floor (wrench_compose.scoring).
     return [manifest_entry(pgs[0], hog=name, hog_connections=held, same_type_total=len(pgs))], None, False
 
 

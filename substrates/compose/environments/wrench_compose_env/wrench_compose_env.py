@@ -232,11 +232,25 @@ def _scalar(state: State, key: str, default: float = 0.0) -> float:
     return float(value)
 
 
+def throughput_retained_reward(state: State) -> float:
+    """Reward. Floor-adjusted Throughput Retained when the fire defines one
+    (``entity_destruction`` / ``adaptive_strike``: the passive-redundancy
+    floor ``(n-1)/n`` of the frozen baseline, ``n`` the victim service's
+    replica count at fire time, is removed from numerator and denominator),
+    else plain pooled TR. Both are winsorized to [-0.5, 1.5]; 0.0 when
+    nothing fired or no fire had a valid baseline (check ``tr_scoreable``).
+    A single point of failure has floor 0, so there the two coincide."""
+    result = state.get("wrench") or {}
+    metrics = result.get("metrics") or {}
+    if metrics.get("throughput_retained_floor_adj") is not None:
+        return float(metrics["throughput_retained_floor_adj"])
+    return _scalar(state, "throughput_retained")
+
+
 def throughput_retained(state: State) -> float:
-    """Reward. Pooled, winsorized Throughput Retained over every fired
-    fault (sum actual / sum expected post-fire jobs against the frozen
-    pre-fire baseline, clamped to [-0.5, 1.5]). 0.0 when nothing fired or
-    no fire had a valid baseline; check ``tr_scoreable`` before pooling."""
+    """Pooled, winsorized Throughput Retained over every fired fault (sum
+    actual / sum expected post-fire jobs against the frozen pre-fire
+    baseline, clamped to [-0.5, 1.5]), before any floor adjustment."""
     return _scalar(state, "throughput_retained")
 
 
@@ -251,8 +265,8 @@ def throughput_retained_raw(state: State) -> float:
 
 
 def throughput_retained_floor_adj(state: State) -> float:
-    """TR with the passive-redundancy floor removed (entity_destruction
-    fires only); 0.0 when undefined."""
+    """TR with the passive-redundancy floor removed (``entity_destruction``
+    and ``adaptive_strike`` fires); 0.0 when undefined."""
     return _scalar(state, "throughput_retained_floor_adj")
 
 
@@ -322,8 +336,9 @@ def command_rate(state: State) -> float:
 
 def build_rubric() -> vf.Rubric:
     rubric = vf.Rubric()
-    rubric.add_reward_func(throughput_retained, weight=1.0)
+    rubric.add_reward_func(throughput_retained_reward, weight=1.0)
     for metric in (
+        throughput_retained,
         tr_scoreable,
         throughput_retained_raw,
         throughput_retained_floor_adj,

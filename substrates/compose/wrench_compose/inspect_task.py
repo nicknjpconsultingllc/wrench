@@ -23,8 +23,11 @@ the model path can recover, not just the fixture path.
 
 import asyncio
 import logging
+import re
 import traceback
+from collections.abc import Callable
 
+import anyio
 from inspect_ai import Task, task
 from inspect_ai.dataset import Sample
 from inspect_ai.model import (
@@ -47,6 +50,7 @@ from wrench_compose.episode import (
     DEFAULT_TURNS,
     NO_OUTPUT_FEEDBACK,
     ComposeEpisode,
+    EpisodeError,
     parse_command,
 )
 from wrench_compose.kinds import parse_kinds, parse_seeds
@@ -56,8 +60,17 @@ from wrench_compose.slots import slot_pool
 
 logger = logging.getLogger(__name__)
 
-# One command per reply; a reasoning-heavy model still gets room.
-MAX_TOKENS = 1024
+# One command per reply, but OpenRouter counts a reasoning model's thinking
+# against max_tokens (and gemini-2.5-pro cannot switch thinking off), so
+# 1024 came back as an empty completion turn after turn.
+MAX_TOKENS = 4096
+# Thinking budget for the providers that take one (Anthropic, Gemini);
+# OpenAI-style models get reasoning_effort="low" instead.
+REASONING_TOKENS = 1024
+_OPENAI_REASONING_MODEL = re.compile(r"^(gpt-[5-9]|o[1-9])")
+# Consecutive empty completions before the episode is abandoned as an error
+# row instead of burning the rest of its turn budget.
+NO_OUTPUT_TURNS = 4
 # The Factorio solver keeps the system message plus the most recent 24
 # messages. Compose observations are ~15x smaller, so the same window
 # costs far less; it is kept for the one-contract story.
@@ -83,6 +96,25 @@ class ComposeData(StoreModel):
     shaped_rewards: list[dict] = Field(default_factory=list)
 
 
+class NoOutputError(EpisodeError):
+    """The model produced ``NO_OUTPUT_TURNS`` empty completions in a row."""
+
+
+def generate_config(model_name: str) -> GenerateConfig:
+    """Per-model generate config. OpenRouter maps ``reasoning_effort`` to
+    ``reasoning.effort`` and ``reasoning_tokens`` to ``reasoning.max_tokens``
+    (``inspect_ai.model._providers.openrouter``); the direct providers take
+    them natively. Models without a reasoning knob (mockllm, the scripted
+    operator, older chat models) get only the token/retry bounds."""
+    name = model_name.lower()
+    kwargs: dict = dict(max_tokens=MAX_TOKENS, max_retries=5, timeout=180)
+    if _OPENAI_REASONING_MODEL.match(name.rsplit("/", 1)[-1]):
+        kwargs["reasoning_effort"] = "low"
+    elif any(vendor in name for vendor in ("claude", "anthropic", "gemini", "google")):
+        kwargs["reasoning_tokens"] = REASONING_TOKENS
+    return GenerateConfig(**kwargs)
+
+
 def _sync_store(data: ComposeData, episode: ComposeEpisode) -> None:
     data.samples = list(episode.samples)
     data.ledger_events = list(episode.ledger_events)
@@ -98,14 +130,19 @@ def compose_solver(
     turn_period_s: float | None = None,
     context_messages: int = DEFAULT_CONTEXT_MESSAGES,
     out_root: str | None = None,
+    episode_factory: Callable[..., ComposeEpisode] = ComposeEpisode,
 ):
     """Drive one ComposeEpisode, syncing the store after every turn.
 
     Mirrors the Factorio solver: the outer try/except records
-    ``ComposeData.error`` and returns normally (so a failed episode is an
-    error row in the table, never a crashed eval), the slot is released in
-    ``finally``, and every turn-level failure consumes a turn instead of
-    aborting the episode.
+    ``ComposeData.error``, the slot is released in ``finally``, and every
+    turn-level failure consumes a turn instead of aborting the episode.
+    Unlike the Factorio solver it then re-raises, so an infrastructure
+    failure is ``sample.error`` (retried by ``retry_on_error``), never a
+    0-fire "success".
+    ``NO_OUTPUT_TURNS`` consecutive empty completions abandon the episode
+    (``NoOutputError``) rather than burning the remaining turns.
+    ``episode_factory`` exists for the unit tests (no Docker).
     """
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
@@ -122,7 +159,7 @@ def compose_solver(
             pool = await slot_pool()
             slot = await pool.acquire()
             data.slot = slot
-            episode = ComposeEpisode(
+            episode = episode_factory(
                 kind,
                 seed,
                 slot=slot,
@@ -137,8 +174,11 @@ def compose_solver(
             data.quota = episode.quota
             data.quota_item = episode.quota_item
             state.messages = [ChatMessageSystem(content=episode.system_prompt())]
+            model = get_model()
+            config = generate_config(model.name)
 
             turn = 0
+            empty_turns = 0
             while not episode.is_done:
                 turn += 1
                 if len(state.messages) > context_messages + 1 and state.messages[0].role == "system":
@@ -146,24 +186,28 @@ def compose_solver(
                 try:
                     state.messages.append(ChatMessageUser(content=await asyncio.to_thread(episode.observe)))
                     try:
-                        state.output = await get_model().generate(
-                            input=state.messages,
-                            config=GenerateConfig(max_tokens=MAX_TOKENS, max_retries=5, timeout=180),
-                        )
+                        state.output = await model.generate(input=state.messages, config=config)
                     except Exception as gen_err:  # noqa: BLE001
                         logger.warning(f"WRENCH compose turn {turn} generate() error: {gen_err}")
                         state.messages.append(ChatMessageAssistant(content="[generation failed this turn]"))
                         await asyncio.to_thread(episode.skip_step, f"Turn {turn} generation error: {gen_err}")
                         _sync_store(data, episode)
                         continue
-                    if not state.output.choices:
+                    completion = state.output.completion if state.output.choices else ""
+                    if not completion.strip():
+                        empty_turns += 1
                         state.messages.append(ChatMessageAssistant(content="[no output produced this turn]"))
                         await asyncio.to_thread(episode.skip_step, NO_OUTPUT_FEEDBACK)
                         _sync_store(data, episode)
+                        if empty_turns >= NO_OUTPUT_TURNS:
+                            raise NoOutputError(f"model produced no output for {NO_OUTPUT_TURNS} consecutive turns")
                         continue
+                    empty_turns = 0
                     state.messages.append(state.output.message)
-                    await asyncio.to_thread(episode.step, parse_command(state.output.completion))
+                    await asyncio.to_thread(episode.step, parse_command(completion))
                     _sync_store(data, episode)
+                except EpisodeError:
+                    raise
                 except Exception as step_err:  # noqa: BLE001
                     logger.error(f"WRENCH compose turn {turn} error: {step_err}")
                     episode.fail_step(f"Turn {turn} error: {step_err}")
@@ -173,7 +217,10 @@ def compose_solver(
             state.output = ModelOutput(completion=episode.summary(), model=meta.get("model", "unknown"))
             state.completed = True
         except Exception as e:  # noqa: BLE001
-            error_msg = f"WRENCH compose solver error: {e}\n{traceback.format_exc()}"
+            if isinstance(e, EpisodeError):
+                error_msg = str(e)
+            else:
+                error_msg = f"WRENCH compose solver error: {e}\n{traceback.format_exc()}"
             logger.error(error_msg)
             data.error = error_msg
             if episode is not None:
@@ -181,13 +228,23 @@ def compose_solver(
                 _sync_store(data, episode)
             state.output = ModelOutput(completion=f"Error in WRENCH compose episode: {e}", model="unknown")
         finally:
-            if episode is not None:
-                await asyncio.to_thread(episode.cleanup)
-            if slot is not None:
-                try:
-                    await (await slot_pool()).release(slot)
-                except Exception as release_err:  # noqa: BLE001
-                    logger.error(f"error releasing slot {slot}: {release_err}")
+            # Inspect cancels samples through anyio cancel scopes (time
+            # limits, Ctrl-C, fail-fast); inside a cancelled scope every
+            # await raises again, so an unshielded teardown would skip the
+            # release and leak the slot for the rest of the run.
+            with anyio.CancelScope(shield=True):
+                if episode is not None:
+                    await asyncio.to_thread(episode.cleanup)
+                if slot is not None:
+                    try:
+                        await (await slot_pool()).release(slot)
+                    except Exception as release_err:  # noqa: BLE001
+                        logger.error(f"error releasing slot {slot}: {release_err}")
+        if data.error:
+            # Re-raise after the cleanup so Inspect records ``sample.error``
+            # and ``retry_on_error`` gets another attempt; ``fail_on_error=False``
+            # keeps the rest of the eval running.
+            raise EpisodeError(data.error)
         return state
 
     return solve
@@ -298,6 +355,7 @@ def create_compose_task(
     context_messages: int = DEFAULT_CONTEXT_MESSAGES,
     out_root: str | None = None,
     name: str | None = None,
+    episode_factory: Callable[..., ComposeEpisode] = ComposeEpisode,
 ) -> Task:
     """One Sample per (kind, seed). ``kinds`` and ``seeds`` accept lists or
     comma-separated strings (``-T kinds=belt_cut,adaptive_strike -T seeds=1,3``)."""
@@ -326,6 +384,7 @@ def create_compose_task(
             turn_period_s=float(turn_period_s),
             context_messages=int(context_messages),
             out_root=out_root,
+            episode_factory=episode_factory,
         ),
         scorer=[throughput_retained(), recovery(), detection()],
         name=name or (kind_list[0] if len(kind_list) == 1 else "compose_sentinel"),

@@ -38,7 +38,7 @@ only when the stamp verifies. Nothing inside the factory can mint throughput
 ```bash
 make venv            # uv venv + pip install -e .[dev] -e ./wrenchctl
 make build           # wrench-svc:local (all admin/factory Python services) + wrench-agent:local (the sandbox)
-make test            # 86 unit tests, no Docker (inspect-ai + verifiers installed by make venv)
+make test            # 117 unit tests, no Docker (inspect-ai + verifiers installed by make venv)
 make test-partition  # 9 anti-gaming checks from inside the sandbox, ~1 min with Docker
 make test-live       # every compose_live test: partition + bracketing + 4 no-op floor cells, ~25 min
 make demo            # no-op vs oracle on entity_destruction, ~8 min
@@ -101,7 +101,10 @@ The before/after is in `docs/jitter_study.md`.
 Detection: the fork's scorer matches `report_fault` to fires by position
 radius, so services have fixed synthetic positions 20 units apart
 (`wrench_compose/positions.py`); `report_fault <service>` lands on that
-service's position, strict radius 3 matches only the right service.
+service's position, strict radius 3 matches only the right service. A
+`belt_cut` manifest lists the workers plus `netproxy` and `redis`
+(`wrench_compose/manifest.py`), so a report naming any of the three earns
+credit; the agent cannot tell which end of the hop is at fault.
 
 Seeds against the default 2-worker layout (candidates sorted:
 `gateway-1, worker-1, worker-2`): seed 3 picks `worker-1` (redundant,
@@ -202,10 +205,12 @@ contract, one class in the middle.
 
 `wrench_compose/inspect_task.py` mirrors `fle/eval/inspect/wrench.py`: the
 solver is Inspect's message/generate loop around `ComposeEpisode` (system
-prompt + the most recent 24 messages per call, `max_tokens` 1024, bounded
-retries), it copies the episode into a `ComposeData` store after every turn,
-and its outer `try/except` records `ComposeData.error` and returns normally,
-so an infrastructure failure is an error row, never a crashed eval. The
+prompt + the most recent 24 messages per call, `max_tokens` 4096 with a
+per-model reasoning cap: `reasoning_effort=low` for OpenAI reasoning models,
+a 1024-token thinking budget for Anthropic/Gemini; bounded retries), it
+copies the episode into a `ComposeData` store after every turn, and four
+consecutive empty completions abandon the episode as an error row instead
+of burning the remaining turns. The
 scorers `throughput_retained` / `recovery` / `detection` are pure readers of
 that store through `episode_metrics` and carry the same value/metadata
 shapes as the fork's (`pooled_numerator` / `pooled_denominator`,
@@ -257,7 +262,8 @@ WRENCH_COMPOSE_SLOTS=2 vf-eval wrench-compose-env -m <model> -n 8 -r 1 -c 2 -a '
 
 `environments/wrench_compose_env/` mirrors `environments/wrench_factorio`
 in the fork: a `MultiTurnEnv` around `ComposeEpisode` (dataset = kinds x
-seeds, reward = pooled winsorized TR, every other metric at weight 0,
+seeds, reward = floor-adjusted pooled TR where the fire defines a floor, else
+plain pooled winsorized TR; every other metric at weight 0,
 `tr_scoreable` to filter on), so the Hub can host both substrates.
 
 ### Cost and time

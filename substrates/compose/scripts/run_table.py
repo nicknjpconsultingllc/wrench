@@ -14,10 +14,10 @@ Time-to-recovery is pooled through ``wrench_core.survival``: the per-fire
 Kaplan-Meier and the table shows the KM median per (model, kind).
 
 An episode counts as an error row when ``sample.error`` is set OR the
-``ComposeData:error`` store field is non-empty: the solver's own
-try/except returns normally after an infrastructure failure (a slot that
-never came up, a probe that never fired), so ``sample.error`` alone would
-report such an episode as a genuine 0-fire success.
+``ComposeData:error`` store field is non-empty. The solver re-raises after
+an infrastructure failure (a slot that never came up, a probe that never
+fired), so ``sample.error`` is set and ``retry_on_error`` retries the
+episode; the store check stays as belt and braces.
 
 Usage:
     python scripts/run_table.py --models openrouter/anthropic/claude-sonnet-4.5,openrouter/openai/gpt-5-mini \\
@@ -38,7 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from wrench_core.metrics import episode_metrics
-from wrench_core.scoring import winsorize_tr
+from wrench_core.scoring import DETECTION_PRECISION_FLOOR, winsorize_tr
 from wrench_core.survival import pooled_time_to_recovery
 
 from wrench_compose.kinds import KINDS, parse_kinds, parse_seeds
@@ -49,6 +49,9 @@ TR_SCORER = "throughput_retained"
 RECOVERY_SCORER = "recovery"
 DETECTION_SCORER = "detection"
 STORE_PREFIX = "ComposeData:"
+# Extra attempts per episode whose solver raised (stack never came up, no
+# fire, model went silent) before it stands as an error row.
+RETRY_ON_ERROR = 2
 
 
 def _num(value):
@@ -168,6 +171,18 @@ def collect_episode_rows(logs):
     return rows
 
 
+def pooled_recall(matched_fires, num_fires, precision, floor=DETECTION_PRECISION_FLOOR):
+    """Pooled detection recall with the per-episode gate of
+    ``wrench_core.scoring.detection_metrics`` applied to the pooled loose
+    precision: below ``floor`` the group's recall is 0. None (rendered
+    ``-``) when the group has no fires: nothing was there to detect."""
+    if not num_fires:
+        return None
+    if precision < floor:
+        return 0.0
+    return matched_fires / num_fires
+
+
 def aggregate_rows(rows):
     """Pooled per-(model, kind) aggregates: sum numerators / sum denominators,
     plus the Kaplan-Meier time-to-recovery over the group's fires."""
@@ -193,6 +208,8 @@ def aggregate_rows(rows):
         num_fires = sum(e["num_fires"] for e in ok)
         latencies = [lat for e in ok for lat in e["detection_latencies"]]
         ttr = pooled_time_to_recovery([e["ttr"] for e in ok if e.get("ttr")])
+        precision = matched_reports / num_reports if num_reports else 1.0
+        recall = pooled_recall(matched_fires, num_fires, precision)
         aggregates.append(
             {
                 "model": model,
@@ -212,8 +229,8 @@ def aggregate_rows(rows):
                 "recovery_rate": recovered / scoreable if scoreable else None,
                 "recovered": recovered,
                 "scoreable_fires": scoreable,
-                "detection_recall": (matched_fires / num_fires if num_fires else 1.0),
-                "detection_precision": (matched_reports / num_reports if num_reports else 1.0),
+                "detection_recall": recall,
+                "detection_precision": precision,
                 "detection_precision_strict": (matched_strict / num_reports if num_reports else 1.0),
                 "mean_detection_latency_ticks": (sum(latencies) / len(latencies) if latencies else None),
                 "ttr_km_median_ticks": ttr["median_ticks"] if ttr else None,
@@ -240,8 +257,11 @@ def write_markdown(path: Path, aggregates, rows, args):
         "`-` = not scoreable (no fires with a valid frozen baseline).",
         "TR is winsorized to [-0.5, 1.5] (wrench_core.scoring) and is the",
         "headline metric; TR (raw) is the same pooled ratio before the clamp.",
-        "TR (floor-adj) subtracts the passive-redundancy floor (entity_destruction",
-        "fires carrying same_type_total) from numerator and denominator.",
+        "TR (floor-adj) subtracts the passive-redundancy floor (entity_destruction and",
+        "adaptive_strike fires carrying same_type_total) from numerator and denominator.",
+        "Det. recall is pooled matched fires / fires, gated to 0 when the pooled",
+        f"loose precision is below {DETECTION_PRECISION_FLOOR} (the per-episode gate, applied to the pool);",
+        "`-` when the group had no fires.",
         "TTR median is the Kaplan-Meier median time to sustained recovery in ms",
         "over the group's fires (censored fires stay at risk until the window",
         "end; `-` when fewer than half recovered).",
@@ -355,6 +375,7 @@ def main():
         max_connections=args.max_connections,
         max_samples=args.max_samples or configured_slots(),
         fail_on_error=False,
+        retry_on_error=RETRY_ON_ERROR,
     )
     success, logs = eval_set(**eval_kwargs)
     if not success:

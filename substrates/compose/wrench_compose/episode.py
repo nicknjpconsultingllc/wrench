@@ -79,8 +79,20 @@ def _sh(args, env, check=True, capture=False, timeout=300):
     return subprocess.run(args, env=env, check=check, capture_output=capture, text=True, timeout=timeout)
 
 
+# Which slot_env() variable names each compose file's project.
+PROJECT_ENV = {"factory.yml": "WRENCH_FACTORY_PROJECT", "admin.yml": "WRENCH_ADMIN_PROJECT"}
+
+
+def compose_argv(env, file, *args) -> list[str]:
+    """``docker compose -f <file> -p <project> ...``. The project is passed
+    explicitly (not left to the file's ``name:`` default) so a host
+    ``COMPOSE_PROJECT_NAME`` cannot collapse two slots into one project."""
+    project = env[PROJECT_ENV[file]]
+    return ["docker", "compose", "-f", str(COMPOSE / file), "-p", project, *args]
+
+
 def compose(env, file, *args, **kw):
-    return _sh(["docker", "compose", "-f", str(COMPOSE / file), *args], env, **kw)
+    return _sh(compose_argv(env, file, *args), env, **kw)
 
 
 def default_config(**overrides) -> dict:
@@ -621,15 +633,14 @@ class ComposeEpisode:
             raise RuntimeError("episode is over: turn budget spent")
         turn = self.turn
         if not command:
+            self._pace()
             self.feedback = NO_COMMAND_FEEDBACK
             self.actions.append({"turn": turn, "command": None})
             self.drain()
             self.turn += 1
             return self.feedback
 
-        wait = self._last_exec + self.turn_period_s - time.monotonic()
-        if wait > 0:
-            time.sleep(wait)
+        self._pace()
         t = time.monotonic()
         r = self.sandbox.run(command)
         ms = int((time.monotonic() - t) * 1000)
@@ -656,10 +667,11 @@ class ComposeEpisode:
 
     def skip_step(self, feedback: str) -> str:
         """Consume a turn on which no command could be attempted (the model
-        call failed or produced no output). Still drains."""
+        call failed or produced no output). Still drains, still paced."""
         self._require_started()
         if self.is_done:
             raise RuntimeError("episode is over: turn budget spent")
+        self._pace()
         self.feedback = feedback
         self.actions.append({"turn": self.turn, "command": None, "skipped": feedback})
         self.drain()
@@ -672,6 +684,15 @@ class ComposeEpisode:
         self.actions.append({"turn": self.turn, "command": None, "failed": feedback})
         self.turn += 1
         return self.feedback
+
+    def _pace(self) -> None:
+        """Hold every turn to ``turn_period_s``, the no-command and no-output
+        turns included: a model that answers with nothing must not burn its
+        30-turn budget in the first seconds, before the fault has fired."""
+        wait = self._last_exec + self.turn_period_s - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+        self._last_exec = time.monotonic()
 
     # -- probe bookkeeping -------------------------------------------------
 
@@ -718,13 +739,19 @@ class ComposeEpisode:
     def run_to_window_end(self) -> None:
         """Wait for the fire (the spec arms on demonstrated throughput) and
         then for the post-fire window to close. Raises ``EpisodeError``
-        when nothing fires within the fire timeout: an episode with no
-        fire is a broken episode, not a good agent."""
+        when nothing fires within the fire timeout or the spec resolved to
+        ``failed`` / ``not_applicable``: an episode with no fire is a broken
+        episode, not a good agent, and must never score as a 0-fire success."""
         self._require_started()
         if self.fired is None:
             self.fired = self.stack.wait_resolved(float(self.cfg["fire_timeout_s"]))
-        if self.fired["event"] == "fired":
-            self.stack.wait_tick(self.window_end_tick)
+        if self.fired["event"] != "fired":
+            detail = self.fired.get("detail") or {}
+            raise EpisodeError(
+                f"fault did not fire: the spec resolved to {self.fired['event']!r} "
+                f"at tick {self.fired.get('tick')} ({detail.get('error') or detail or 'no detail'})"
+            )
+        self.stack.wait_tick(self.window_end_tick)
 
     def finalize(self) -> dict[str, Any]:
         """Run to the window end, final drain, compute every metric, write
@@ -736,6 +763,9 @@ class ComposeEpisode:
                 self.run_to_window_end()
             finally:
                 self.drain()
+            if not self.fires:
+                terminal = next((e for e in self.ledger_events if e.get("event") in ("not_applicable", "failed")), None)
+                raise EpisodeError(f"no fired event in the ledger; terminal event: {terminal or 'none'}")
             try:
                 self.end_tick = self.stack.tick()
             except Exception as tick_err:  # noqa: BLE001
