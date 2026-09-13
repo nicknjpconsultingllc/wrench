@@ -296,3 +296,16 @@ class TestNoFire:
         stack.ledger = lambda: [{"tick": 1000, "event": "armed", "kind": "belt_cut", "seed": 3}, failed]
         with pytest.raises(EpisodeError, match="'failed'"):
             ep.finalize()
+
+
+class TestComposeArgv:
+    def test_project_is_explicit_per_slot(self, tmp_path):
+        from wrench_compose.episode import COMPOSE, compose_argv, default_config, slot_env
+
+        env = slot_env(1, default_config(seed=1), tmp_path)
+        env["COMPOSE_PROJECT_NAME"] = "stray-host-project"
+        argv = compose_argv(env, "factory.yml", "up", "-d")
+        assert argv == ["docker", "compose", "-f", str(COMPOSE / "factory.yml"), "-p", "wrench-factory-1", "up", "-d"]
+        argv = compose_argv(env, "admin.yml", "down", "-v")
+        assert argv[argv.index("-p") + 1] == "wrench-admin-1" and argv[-2:] == ["down", "-v"]
+        assert compose_argv(slot_env(0, default_config(seed=1), tmp_path), "factory.yml")[5] == "wrench-factory-0"

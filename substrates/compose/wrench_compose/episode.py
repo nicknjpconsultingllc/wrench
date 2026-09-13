@@ -79,8 +79,20 @@ def _sh(args, env, check=True, capture=False, timeout=300):
     return subprocess.run(args, env=env, check=check, capture_output=capture, text=True, timeout=timeout)
 
 
+# Which slot_env() variable names each compose file's project.
+PROJECT_ENV = {"factory.yml": "WRENCH_FACTORY_PROJECT", "admin.yml": "WRENCH_ADMIN_PROJECT"}
+
+
+def compose_argv(env, file, *args) -> list[str]:
+    """``docker compose -f <file> -p <project> ...``. The project is passed
+    explicitly (not left to the file's ``name:`` default) so a host
+    ``COMPOSE_PROJECT_NAME`` cannot collapse two slots into one project."""
+    project = env[PROJECT_ENV[file]]
+    return ["docker", "compose", "-f", str(COMPOSE / file), "-p", project, *args]
+
+
 def compose(env, file, *args, **kw):
-    return _sh(["docker", "compose", "-f", str(COMPOSE / file), *args], env, **kw)
+    return _sh(compose_argv(env, file, *args), env, **kw)
 
 
 def default_config(**overrides) -> dict:
