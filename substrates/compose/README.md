@@ -101,7 +101,10 @@ The before/after is in `docs/jitter_study.md`.
 Detection: the fork's scorer matches `report_fault` to fires by position
 radius, so services have fixed synthetic positions 20 units apart
 (`wrench_compose/positions.py`); `report_fault <service>` lands on that
-service's position, strict radius 3 matches only the right service.
+service's position, strict radius 3 matches only the right service. A
+`belt_cut` manifest lists the workers plus `netproxy` and `redis`
+(`wrench_compose/manifest.py`), so a report naming any of the three earns
+credit; the agent cannot tell which end of the hop is at fault.
 
 Seeds against the default 2-worker layout (candidates sorted:
 `gateway-1, worker-1, worker-2`): seed 3 picks `worker-1` (redundant,
