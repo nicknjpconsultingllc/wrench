@@ -10,3 +10,4 @@ runs/pipeline*.sh
 runs/*/.secrets/
 table_runs/
 logs/
+runs/.slot-*.lock
