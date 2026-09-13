@@ -6,7 +6,10 @@ requires-python = ">=3.11"
 dependencies = ["pydantic>=2,<3", "wrench-core"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.5"]
+dev = ["pytest>=8", "ruff>=0.11.13,<0.12", "inspect-ai>=0.3.139", "verifiers>=0.2.0,<0.3"]
+
+[project.entry-points.inspect_ai]
+wrench_compose = "wrench_compose.inspect_task"
 
 [build-system]
 requires = ["setuptools>=68"]

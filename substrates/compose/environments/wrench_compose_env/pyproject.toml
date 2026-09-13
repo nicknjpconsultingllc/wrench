@@ -1,0 +1,32 @@
+[project]
+name = "wrench-compose-env"
+description = "WRENCH compose substrate: operate a docker-compose job pipeline through wrenchctl, survive seeded faults, scored on throughput retained, recovery and fault detection"
+tags = ["multi-turn", "agent", "sre", "docker", "disruption-recovery", "eval", "train"]
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    # Classic (v0) MultiTurnEnv API of 0.2.x; get_prompt_messages /
+    # render_completion override internals, so cap the minor version.
+    # `prime env push --runtime v0` (see README).
+    "verifiers>=0.2.0,<0.3",
+    "datasets>=2.0",
+    # The compose substrate (episode driver, sandbox, scoring). Not on PyPI;
+    # installed from the repository.
+    "wrench-compose @ git+https://github.com/nicknjpconsultingllc/wrench.git#subdirectory=substrates/compose",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build]
+include = ["wrench_compose_env.py", "README.md", "pyproject.toml"]
+
+[tool.verifiers.eval]
+# One rollout per (kind, seed) row; the four default rows are the four
+# fault kinds at seed 1.
+num_examples = 4
+rollouts_per_example = 1
