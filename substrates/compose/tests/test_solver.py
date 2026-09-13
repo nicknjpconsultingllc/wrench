@@ -133,7 +133,7 @@ class SlowUpStack(FakeStack):
         super().up()
 
 
-def test_cancelled_sample_still_tears_down_and_releases_the_slot(monkeypatch):
+def test_cancelled_sample_still_tears_down_and_releases_the_slot(tmp_path, monkeypatch):
     import anyio
     from inspect_ai.model import ModelName
     from inspect_ai.solver import TaskState
@@ -144,7 +144,7 @@ def test_cancelled_sample_still_tears_down_and_releases_the_slot(monkeypatch):
     monkeypatch.setenv(slots.SLOTS_ENV, "1")
     slots._POOL = None
     factory = EpisodeRecorder(stack_factory=SlowUpStack)
-    solve = compose_solver(turns=2, turn_period_s=0, episode_factory=factory)
+    solve = compose_solver(turns=2, turn_period_s=0, out_root=str(tmp_path), episode_factory=factory)
 
     async def main():
         pool = await slots.slot_pool()
