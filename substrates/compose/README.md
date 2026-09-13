@@ -38,7 +38,7 @@ only when the stamp verifies. Nothing inside the factory can mint throughput
 ```bash
 make venv            # uv venv + pip install -e .[dev] -e ./wrenchctl
 make build           # wrench-svc:local (all admin/factory Python services) + wrench-agent:local (the sandbox)
-make test            # 86 unit tests, no Docker (inspect-ai + verifiers installed by make venv)
+make test            # 117 unit tests, no Docker (inspect-ai + verifiers installed by make venv)
 make test-partition  # 9 anti-gaming checks from inside the sandbox, ~1 min with Docker
 make test-live       # every compose_live test: partition + bracketing + 4 no-op floor cells, ~25 min
 make demo            # no-op vs oracle on entity_destruction, ~8 min
