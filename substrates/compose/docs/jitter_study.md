@@ -58,6 +58,28 @@ Detection for every oracle cell: precision_strict 1.0, recall 1.0, latency
 285-441 ms (the oracle reports before it repairs). Every no-op / restart_all
 cell: recall 0.0, precision 1.0 (vacuous, no reports).
 
+### Oracle through the sandbox (M3, `runs/floor_20260912T174905_*_oracle`)
+
+The oracle now acts only as `docker exec <sandbox> wrenchctl --json ...`
+(no admin path, no host-side HTTP client), at the `cputime` default. Same
+seeds as the table above.
+
+| kind | victim | oracle TR | recovered (TTR) | detection latency | wrenchctl calls (ms) |
+|---|---|---|---|---|---|
+| entity_destruction | gateway-1 | 0.985 | yes (30.5 s) | 818 ms | report_fault 272, scale gateway 1: 404 |
+| belt_cut | latency 1000 ms on worker->redis | 0.996 | yes (30.5 s) | 564 ms | report_fault 269, config edit worker REDIS_URL: 653 |
+| resource_exhaustion | pghog holds 16 slots | 0.996 | yes (30.5 s) | 607 ms | report_fault 228, exec postgres psql: 329 |
+| adaptive_strike v2 | gateway-1 (score 1.0) | 0.987 | yes (30.5 s) | 746 ms | report_fault 291, scale gateway 1: 401 |
+
+Every cell recovers and detects at precision 1.0 / recall 1.0, so the
+agent-visible surface is sufficient for all four kinds. Two shifts against
+the host-client numbers: detection latency grew from 285-441 ms to
+564-818 ms (one `docker exec` round trip, ~230-290 ms, in front of every
+call), and the two gateway-kill cells dropped from 0.992-0.996 to
+0.985-0.987 because the rebuilt gateway comes up ~0.4 s later for the same
+reason and the open-loop loadgen loses those jobs. Both are the cost of the
+real boundary, not noise.
+
 ### Fixed-CPU-time workers (5 no-op replays, `runs/jitter_C1_*`)
 
 | kind | agent | n | baseline mean (jobs/min) | baseline SD | TR mean | TR SD | TR CV | fire tick mean (s) | fire tick SD (s) |
@@ -67,11 +89,34 @@ cell: recall 0.0, precision 1.0 (vacuous, no reports).
 Post-fire jobs per 30 s slice, all five replays: 149-154 (iteration mode:
 157-188).
 
+### Replay at the new default (M3: `cputime` default, sandbox + wrenchctl, 3 no-op replays, `runs/jitter_M3cpu_*`)
+
+Same kind, seed and topology as the C1 rows, after `WORK_MODE=cputime` became
+the default and the agent boundary went in (chaos now samples the factory's
+own metrics once a second, workers serve `/metrics`, the sandbox container
+runs alongside the factory; the no-op agent does nothing, so these rows
+measure only what the new default plus that background load does to the
+number).
+
+| kind | agent | n | baseline mean (jobs/min) | baseline SD | TR mean | TR SD | TR CV | fire tick mean (s) | fire tick SD (s) | errors |
+|---|---|---|---|---|---|---|---|---|---|---|
+| entity_destruction (`cputime` default, 195 ms) | noop | 3 | 482.0 | 0.00 | 0.6224 | 0.0000 | 0.0000 | 61.0 | 0.00 | 0 |
+
+Per run: TR 0.62241 / 0.62241 / 0.62241, 600 post-fire jobs in every 120 s
+window (expected 964.0 at the 482.0 baseline), fire at tick 61000 in all
+three. The survivor settles at exactly 300 jobs/min (one job per 200 ms
+wall: 195 ms of CPU plus ~5 ms of redis + postgres I/O), which is why the
+three windows agree to the job. The C1 mean was 0.6267 +/- 0.0017; the level
+moved by 0.004 (the 1 Hz metrics poll on each worker is inside the process's
+CPU budget, so it costs a little wall time per job) and the spread went to
+zero at this n. The CV claim holds at the new default with margin.
+
 
 ## Reading
 
 **Go.** Both kinds clear TR CV <= 0.05 with a no-op agent (entity_destruction
-0.045, belt_cut 0.004), the frozen baseline is 480.5 +/- 0.9 jobs/min (the
+0.045 in the original iteration mode, 0.0027 with fixed CPU time, 0.0000 at
+the shipped `cputime` default; belt_cut 0.004), the frozen baseline is 480.5 +/- 0.9 jobs/min (the
 open-loop 8 jobs/s, as designed), and the fire lands at 60.8 +/- 0.26 s: the
 precondition arms on the first two samples after the 60 s window fills, so the
 only timing noise is the half-second sample grid plus container start skew.
