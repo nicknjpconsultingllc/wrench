@@ -1,0 +1,27 @@
+[project]
+name = "wrench-compose"
+version = "0.1.0"
+description = "WRENCH compose substrate: a docker-compose job pipeline as the disrupted system"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2,<3", "wrench-core"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["wrench_compose"]
+
+[tool.pytest.ini_options]
+markers = ["compose_live: needs Docker and builds/starts the compose projects"]
+addopts = "-m 'not compose_live'"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.uv.sources]
+wrench-core = { path = "../..", editable = true }

@@ -1,0 +1,263 @@
+{
+  "config": {
+    "name": "floor_20260912T115941_belt_cut_restart_all",
+    "kind": "belt_cut",
+    "seed": 1,
+    "agent": "restart_all",
+    "params": {},
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "iters",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "sample_ms": 500,
+    "slot": 0,
+    "label": ""
+  },
+  "timing": {
+    "t_start": 1789240354.711333,
+    "factory_up_s": 2.3,
+    "admin_up_s": 0.7,
+    "fire_wall_s": 60.4,
+    "agent_on_fire_s": 0.0,
+    "teardown_s": 7.1,
+    "t_end": 1789240547.568453,
+    "wall_s": 192.9
+  },
+  "error": null,
+  "spec_id": 1,
+  "fired": {
+    "tick": 60510,
+    "event": "fired",
+    "kind": "belt_cut",
+    "seed": 1,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-1",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      },
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-2",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5194
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 10355
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 185
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 160
+    },
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5165
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 10348
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 242
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 161
+    },
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5197
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 10338
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 233
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 160
+    },
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5186
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 10325
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 245
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 160
+    }
+  ],
+  "probe_status": {
+    "tick": 182857,
+    "samples": 366,
+    "jobs_done": 573,
+    "rejected": 0,
+    "pg_errors": 4
+  },
+  "scores": {
+    "fires": [
+      {
+        "kind": "belt_cut",
+        "fire_tick": 60510,
+        "affected": [
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-1",
+            "x": 40.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            },
+            "same_type_total": 2
+          },
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-2",
+            "x": 40.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            },
+            "same_type_total": 2
+          }
+        ],
+        "baseline_per_min": 480.92757519744583,
+        "tr": 0.09046855654211368,
+        "tr_raw": 0.09046855654211368,
+        "tr_floor_adj": null,
+        "actual_jobs": 87.01764705882351,
+        "expected_jobs": 961.8551503948917,
+        "recovered": false,
+        "ttr_ms": 120000.0
+      }
+    ],
+    "detection": {
+      "latencies": [],
+      "precision": 1.0,
+      "precision_strict": 1.0,
+      "recall": 0.0
+    },
+    "n_samples": 366,
+    "n_reports": 0,
+    "not_applicable": [],
+    "failed": []
+  }
+}

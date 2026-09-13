@@ -1,0 +1,17 @@
+{"tick":61002,"event":"armed","kind":"entity_destruction","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":482.0472128545923}}
+{"tick":61002,"event":"fired","kind":"entity_destruction","seed":1,"affected":[{"service":"gateway","container":"wrench-factory-0-gateway-1","x":0.0,"y":0.0,"same_type_total":1}],"detail":{"id":1}}
+{"tick":71735,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":71909,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"redis","containers":["wrench-factory-0-redis-1"]}}
+{"tick":72065,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}
+{"tick":97439,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":97639,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"redis","containers":["wrench-factory-0-redis-1"]}}
+{"tick":97805,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}
+{"tick":123180,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":123360,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"redis","containers":["wrench-factory-0-redis-1"]}}
+{"tick":123525,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}
+{"tick":148923,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":149109,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"redis","containers":["wrench-factory-0-redis-1"]}}
+{"tick":149288,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}
+{"tick":174646,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":174883,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"redis","containers":["wrench-factory-0-redis-1"]}}
+{"tick":175046,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}

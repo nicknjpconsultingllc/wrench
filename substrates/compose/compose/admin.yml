@@ -1,0 +1,89 @@
+# The admin project: nothing in here is reachable from the agent surface.
+# loadgen, probe and toxiproxy also attach to the factory network because
+# they have to touch it (send jobs, read Postgres, sit on the worker->redis
+# hop); toxiproxy's admin API binds only to its static admin-network IP.
+# chaos is the only container holding the Docker socket.
+name: ${WRENCH_ADMIN_PROJECT:-wrench-admin-0}
+
+x-admin: &admin
+  restart: "no"
+  logging:
+    driver: json-file
+    options: { max-size: "5m", max-file: "1" }
+
+services:
+  toxiproxy:
+    <<: *admin
+    image: ghcr.io/shopify/toxiproxy@sha256:cfdb2ca7ac7131a650d09db49782cc33e5c5d97fd3be5b3a6e27cd13d0ee8d57 # 2.11.0
+    command: ["-host", "10.231.${WRENCH_SLOT:-0}.10", "-port", "8474", "-config", "/config/toxiproxy.json"]
+    volumes:
+      - ./toxiproxy.json:/config/toxiproxy.json:ro
+    labels:
+      wrench.role: admin
+    networks:
+      admin:
+        ipv4_address: 10.231.${WRENCH_SLOT:-0}.10
+      factory:
+        aliases: [netproxy]
+
+  loadgen:
+    <<: *admin
+    image: wrench-svc:local
+    command: python -m loadgen.main
+    environment:
+      GATEWAY_URL: http://gateway:8000
+      RPS: ${WRENCH_RPS:-8}
+      SEED: ${WRENCH_SEED:-1}
+      HMAC_KEY: ${WRENCH_HMAC_KEY:-dev-key}
+    labels:
+      wrench.role: admin
+    networks: [admin, factory]
+
+  probe:
+    <<: *admin
+    image: wrench-svc:local
+    command: python -m probe.main
+    environment:
+      PG_DSN: postgresql://probe:probe@postgres:5432/factory
+      REDIS_URL: redis://redis:6379/0
+      GATEWAY_URL: http://gateway:8000
+      HMAC_KEY: ${WRENCH_HMAC_KEY:-dev-key}
+      CHAOS_URL: http://chaos:8080
+      SAMPLE_MS: ${WRENCH_SAMPLE_MS:-500}
+      ITEM: jobs_done
+    ports:
+      - "127.0.0.1:${WRENCH_PROBE_PORT:-9012}:8080"
+    labels:
+      wrench.role: admin
+    networks: [admin, factory]
+
+  chaos:
+    <<: *admin
+    image: wrench-svc:local
+    command: python -m chaos.main
+    environment:
+      FACTORY_PROJECT: ${WRENCH_FACTORY_PROJECT:-wrench-factory-0}
+      FACTORY_NET: ${WRENCH_FACTORY_NET:-wrench_factory_0}
+      ADMIN_PROJECT: ${WRENCH_ADMIN_PROJECT:-wrench-admin-0}
+      TOXIPROXY_URL: http://10.231.${WRENCH_SLOT:-0}.10:8474
+      PROBE_URL: http://probe:8080
+      HOG_IMAGE: wrench-svc:local
+      HOG_DSN: postgresql://analytics:analytics@postgres:5432/factory
+      SCALE_CAP: "4"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "127.0.0.1:${WRENCH_CHAOS_PORT:-9011}:8080"
+    labels:
+      wrench.role: admin
+    networks: [admin]
+
+networks:
+  admin:
+    name: ${WRENCH_ADMIN_NET:-wrench_admin_0}
+    ipam:
+      config:
+        - subnet: 10.231.${WRENCH_SLOT:-0}.0/24
+  factory:
+    external: true
+    name: ${WRENCH_FACTORY_NET:-wrench_factory_0}

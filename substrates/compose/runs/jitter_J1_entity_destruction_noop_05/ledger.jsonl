@@ -1,0 +1,2 @@
+{"tick":60508,"event":"armed","kind":"entity_destruction","seed":3,"affected":[],"detail":{"id":1,"rate_per_min":481.95180481951803}}
+{"tick":60508,"event":"fired","kind":"entity_destruction","seed":3,"affected":[{"service":"worker","container":"wrench-factory-0-worker-1","x":40.0,"y":0.0,"same_type_total":2}],"detail":{"id":1}}

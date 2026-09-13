@@ -1,0 +1,275 @@
+{
+  "config": {
+    "name": "floor_20260912T115941_adaptive_strike_restart_all",
+    "kind": "adaptive_strike",
+    "seed": 1,
+    "agent": "restart_all",
+    "params": {},
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "iters",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "sample_ms": 500,
+    "slot": 0,
+    "label": ""
+  },
+  "timing": {
+    "t_start": 1789241514.419171,
+    "factory_up_s": 2.2,
+    "admin_up_s": 0.7,
+    "fire_wall_s": 60.9,
+    "agent_on_fire_s": 0.0,
+    "teardown_s": 7.3,
+    "t_end": 1789241707.796488,
+    "wall_s": 193.4
+  },
+  "error": null,
+  "spec_id": 1,
+  "fired": {
+    "tick": 61003,
+    "event": "fired",
+    "kind": "adaptive_strike",
+    "seed": 1,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-2",
+        "x": 40.0,
+        "y": 0.0,
+        "inflight": 20.0,
+        "inflight_all": {
+          "gateway": 0.0,
+          "redis": 0.0,
+          "worker:7afdec6239ae": 0.0,
+          "worker:7e6a1b86d4ff": 20.0,
+          "postgres": 0.0
+        },
+        "holder": "worker:7e6a1b86d4ff",
+        "same_type_total": 2
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5185
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 5157
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 217
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 160
+    },
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5188
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 5168
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 178
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 140
+    },
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5178
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 5177
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 182
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 172
+    },
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5190
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 5158
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 207
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 156
+    },
+    {
+      "action": "restart",
+      "args": [
+        "gateway"
+      ],
+      "ok": true,
+      "ms": 5170
+    },
+    {
+      "action": "restart",
+      "args": [
+        "worker"
+      ],
+      "ok": true,
+      "ms": 5156
+    },
+    {
+      "action": "restart",
+      "args": [
+        "redis"
+      ],
+      "ok": true,
+      "ms": 202
+    },
+    {
+      "action": "restart",
+      "args": [
+        "postgres"
+      ],
+      "ok": true,
+      "ms": 141
+    }
+  ],
+  "probe_status": {
+    "tick": 183304,
+    "samples": 367,
+    "jobs_done": 1190,
+    "rejected": 0,
+    "pg_errors": 5
+  },
+  "scores": {
+    "fires": [
+      {
+        "kind": "adaptive_strike",
+        "fire_tick": 61003,
+        "affected": [
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-2",
+            "x": 40.0,
+            "y": 0.0,
+            "inflight": 20.0,
+            "inflight_all": {
+              "gateway": 0.0,
+              "redis": 0.0,
+              "worker:7afdec6239ae": 0.0,
+              "worker:7e6a1b86d4ff": 20.0,
+              "postgres": 0.0
+            },
+            "holder": "worker:7e6a1b86d4ff",
+            "same_type_total": 2
+          }
+        ],
+        "baseline_per_min": 481.056123214375,
+        "tr": 0.7171907089148107,
+        "tr_raw": 0.7171907089148107,
+        "tr_floor_adj": null,
+        "actual_jobs": 690.0179640718563,
+        "expected_jobs": 962.11224642875,
+        "recovered": false,
+        "ttr_ms": 120000.0
+      }
+    ],
+    "detection": {
+      "latencies": [],
+      "precision": 1.0,
+      "precision_strict": 1.0,
+      "recall": 0.0
+    },
+    "n_samples": 367,
+    "n_reports": 0,
+    "not_applicable": [],
+    "failed": []
+  }
+}

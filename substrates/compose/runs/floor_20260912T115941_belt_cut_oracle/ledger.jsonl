@@ -1,0 +1,4 @@
+{"tick":61010,"event":"armed","kind":"belt_cut","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":479.9280107983802}}
+{"tick":61010,"event":"fired","kind":"belt_cut","seed":1,"affected":[{"service":"worker","container":"wrench-factory-0-worker-1","x":40.0,"y":0.0,"via":"netproxy","toxic":"latency","toxic_attributes":{"latency":1000,"jitter":0},"same_type_total":2},{"service":"worker","container":"wrench-factory-0-worker-2","x":40.0,"y":0.0,"via":"netproxy","toxic":"latency","toxic_attributes":{"latency":1000,"jitter":0},"same_type_total":2}],"detail":{"id":1}}
+{"tick":61333,"event":"report_fault","affected":[{"service":"worker","x":40.0,"y":0.0}],"detail":{"service":"worker","cause":"workers cannot reach the queue through netproxy","x":40.0,"y":0.0}}
+{"tick":61742,"event":"agent_action","affected":[],"detail":{"action":"config","service":"worker","env":{"REDIS_URL":"redis://redis:6379/0"},"recreated":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}

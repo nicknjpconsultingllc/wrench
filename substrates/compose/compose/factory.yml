@@ -1,0 +1,93 @@
+# The agent-visible factory: gateway -> redis stream -> worker xN -> postgres.
+# restart: "no" everywhere so nothing self-heals; the agent has to.
+# Workers reach redis through `netproxy` (a Toxiproxy in the admin project,
+# attached to this network) so belt_cut can degrade exactly that hop.
+name: ${WRENCH_FACTORY_PROJECT:-wrench-factory-0}
+
+x-factory: &factory
+  restart: "no"
+  networks: [factory]
+  logging:
+    driver: json-file
+    options: { max-size: "5m", max-file: "1" }
+
+services:
+  gateway:
+    <<: *factory
+    image: ${WRENCH_IMAGE:-wrench-svc:local}
+    command: python -m gateway.main
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      PORT: "8000"
+    labels:
+      wrench.role: factory
+      wrench.service: gateway
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 128M }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=2)"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  redis:
+    <<: *factory
+    image: redis@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf # redis:7.4-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    labels:
+      wrench.role: factory
+      wrench.service: redis
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 128M }
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  postgres:
+    <<: *factory
+    image: postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685 # postgres:16-alpine
+    command: ["postgres", "-c", "max_connections=${WRENCH_PG_MAX_CONN:-20}", "-c", "fsync=off", "-c", "synchronous_commit=off"]
+    environment:
+      POSTGRES_PASSWORD: factory
+      POSTGRES_DB: factory
+    volumes:
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    labels:
+      wrench.role: factory
+      wrench.service: postgres
+    deploy:
+      resources:
+        limits: { cpus: "2.0", memory: 256M }
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d factory"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  worker:
+    <<: *factory
+    image: ${WRENCH_IMAGE:-wrench-svc:local}
+    command: python -m worker.main
+    environment:
+      REDIS_URL: redis://netproxy:6379/0
+      PG_DSN: postgresql://worker:worker@postgres:5432/factory
+      WORK_ITERS: ${WRENCH_WORK_ITERS:-1000000}
+      WORK_MODE: ${WRENCH_WORK_MODE:-iters}
+      WORK_CPU_MS: ${WRENCH_WORK_CPU_MS:-195}
+    labels:
+      wrench.role: factory
+      wrench.service: worker
+    deploy:
+      replicas: ${WRENCH_WORKERS:-2}
+      resources:
+        # Guardrail, not the capacity knob: a worker is single-threaded and
+        # never reaches 2 CPUs, so CFS throttling never adds jitter.
+        limits: { cpus: "2.0", memory: 256M }
+
+networks:
+  factory:
+    name: ${WRENCH_FACTORY_NET:-wrench_factory_0}

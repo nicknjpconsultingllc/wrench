@@ -1,0 +1,8 @@
+[
+  {
+    "name": "worker_redis",
+    "listen": "0.0.0.0:6379",
+    "upstream": "redis:6379",
+    "enabled": true
+  }
+]

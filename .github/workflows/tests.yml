@@ -1,0 +1,32 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+
+      - name: Install
+        run: uv sync --group dev
+
+      - name: Unit tests
+        run: uv run pytest tests -q
+
+      - name: Compose substrate unit tests (no Docker)
+        working-directory: substrates/compose
+        run: |
+          uv venv && uv pip install -e '.[dev]'
+          uv run --no-sync pytest tests -q

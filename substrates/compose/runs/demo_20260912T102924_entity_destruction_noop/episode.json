@@ -1,0 +1,93 @@
+{
+  "config": {
+    "name": "demo_20260912T102924_entity_destruction_noop",
+    "kind": "entity_destruction",
+    "seed": 3,
+    "agent": "noop",
+    "params": {},
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "sample_ms": 500,
+    "slot": 0,
+    "label": ""
+  },
+  "timing": {
+    "t_start": 1789234164.1030982,
+    "factory_up_s": 2.3,
+    "admin_up_s": 0.8,
+    "fire_wall_s": 60.7,
+    "agent_on_fire_s": 0.0,
+    "teardown_s": 7.2,
+    "t_end": 1789234356.962873,
+    "wall_s": 192.9
+  },
+  "error": null,
+  "spec_id": 1,
+  "fired": {
+    "tick": 61005,
+    "event": "fired",
+    "kind": "entity_destruction",
+    "seed": 3,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-1",
+        "x": 40.0,
+        "y": 0.0,
+        "same_type_total": 2
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [],
+  "probe_status": {
+    "tick": 182716,
+    "samples": 366,
+    "jobs_done": 1202,
+    "rejected": 0,
+    "pg_errors": 0
+  },
+  "scores": {
+    "fires": [
+      {
+        "kind": "entity_destruction",
+        "fire_tick": 61005,
+        "affected": [
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-1",
+            "x": 40.0,
+            "y": 0.0,
+            "same_type_total": 2
+          }
+        ],
+        "baseline_per_min": 479.96773326162946,
+        "tr": 0.7344431585860797,
+        "tr_raw": 0.7344431585860797,
+        "tr_floor_adj": 0.4688863171721594,
+        "actual_jobs": 705.0180360721442,
+        "expected_jobs": 959.9354665232589,
+        "recovered": false,
+        "ttr_ms": 120000.0
+      }
+    ],
+    "detection": {
+      "latencies": [],
+      "precision": 1.0,
+      "precision_strict": 1.0,
+      "recall": 0.0
+    },
+    "n_samples": 366,
+    "n_reports": 0,
+    "not_applicable": [],
+    "failed": []
+  }
+}

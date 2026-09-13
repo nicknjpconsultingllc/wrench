@@ -1,0 +1,114 @@
+{
+  "config": {
+    "name": "jitter_J1_entity_destruction_oracle_02",
+    "kind": "entity_destruction",
+    "seed": 3,
+    "agent": "oracle",
+    "params": {},
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "sample_ms": 500,
+    "slot": 0,
+    "label": ""
+  },
+  "timing": {
+    "t_start": 1789238810.649206,
+    "factory_up_s": 2.3,
+    "admin_up_s": 0.8,
+    "fire_wall_s": 61.0,
+    "agent_on_fire_s": 0.11,
+    "teardown_s": 7.3,
+    "t_end": 1789239003.277236,
+    "wall_s": 192.6
+  },
+  "error": null,
+  "spec_id": 1,
+  "fired": {
+    "tick": 61002,
+    "event": "fired",
+    "kind": "entity_destruction",
+    "seed": 3,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-1",
+        "x": 40.0,
+        "y": 0.0,
+        "same_type_total": 2
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "action": "report_fault",
+      "args": [
+        "worker",
+        "wrench-factory-0-worker-1 is gone"
+      ],
+      "ok": true,
+      "ms": 4
+    },
+    {
+      "action": "scale",
+      "args": [
+        "worker",
+        2
+      ],
+      "ok": true,
+      "ms": 103
+    }
+  ],
+  "probe_status": {
+    "tick": 182512,
+    "samples": 366,
+    "jobs_done": 1460,
+    "rejected": 0,
+    "pg_errors": 0
+  },
+  "scores": {
+    "fires": [
+      {
+        "kind": "entity_destruction",
+        "fire_tick": 61002,
+        "affected": [
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-1",
+            "x": 40.0,
+            "y": 0.0,
+            "same_type_total": 2
+          }
+        ],
+        "baseline_per_min": 481.04810481048105,
+        "tr": 0.9978295376616019,
+        "tr_raw": 0.9978295376616019,
+        "tr_floor_adj": 0.9956590753232037,
+        "actual_jobs": 960.0080160320642,
+        "expected_jobs": 962.0962096209621,
+        "recovered": true,
+        "ttr_ms": 30503.0
+      }
+    ],
+    "detection": {
+      "latencies": [
+        441
+      ],
+      "precision": 1.0,
+      "precision_strict": 1.0,
+      "recall": 1.0
+    },
+    "n_samples": 366,
+    "n_reports": 1,
+    "not_applicable": [],
+    "failed": []
+  }
+}

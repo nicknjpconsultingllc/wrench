@@ -1,0 +1,154 @@
+{
+  "config": {
+    "name": "jitter_J1_belt_cut_oracle_01",
+    "kind": "belt_cut",
+    "seed": 1,
+    "agent": "oracle",
+    "params": {},
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "sample_ms": 500,
+    "slot": 0,
+    "label": ""
+  },
+  "timing": {
+    "t_start": 1789239196.139742,
+    "factory_up_s": 2.2,
+    "admin_up_s": 0.9,
+    "fire_wall_s": 60.4,
+    "agent_on_fire_s": 0.39,
+    "teardown_s": 7.4,
+    "t_end": 1789239388.505195,
+    "wall_s": 192.4
+  },
+  "error": null,
+  "spec_id": 1,
+  "fired": {
+    "tick": 60508,
+    "event": "fired",
+    "kind": "belt_cut",
+    "seed": 1,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-1",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      },
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-2",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "action": "report_fault",
+      "args": [
+        "worker",
+        "workers cannot reach the queue through netproxy"
+      ],
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "action": "config",
+      "args": [
+        "worker",
+        {
+          "REDIS_URL": "redis://redis:6379/0"
+        }
+      ],
+      "ok": true,
+      "ms": 390
+    }
+  ],
+  "probe_status": {
+    "tick": 182075,
+    "samples": 365,
+    "jobs_done": 1456,
+    "rejected": 0,
+    "pg_errors": 0
+  },
+  "scores": {
+    "fires": [
+      {
+        "kind": "belt_cut",
+        "fire_tick": 60508,
+        "affected": [
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-1",
+            "x": 40.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            },
+            "same_type_total": 2
+          },
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-2",
+            "x": 40.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            },
+            "same_type_total": 2
+          }
+        ],
+        "baseline_per_min": 481.0160338677956,
+        "tr": 0.9979530834446355,
+        "tr_raw": 0.9979530834446355,
+        "tr_floor_adj": null,
+        "actual_jobs": 960.0628683693517,
+        "expected_jobs": 962.0320677355912,
+        "recovered": true,
+        "ttr_ms": 30993.0
+      }
+    ],
+    "detection": {
+      "latencies": [
+        329
+      ],
+      "precision": 1.0,
+      "precision_strict": 1.0,
+      "recall": 1.0
+    },
+    "n_samples": 365,
+    "n_reports": 1,
+    "not_applicable": [],
+    "failed": []
+  }
+}
