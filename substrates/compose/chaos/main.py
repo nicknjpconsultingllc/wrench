@@ -255,6 +255,8 @@ def fire_resource_exhaustion(seed: int, params: dict):
             if held > 0:
                 break
         time.sleep(0.1)
+    # same_type_total is informational here: nothing is destroyed, so the
+    # scorer applies no redundancy floor (wrench_compose.scoring).
     return [manifest_entry(pgs[0], hog=name, hog_connections=held, same_type_total=len(pgs))], None, False
 
 

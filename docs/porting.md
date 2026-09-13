@@ -34,8 +34,12 @@ where `scope` is a `MatchScope(radius, strict)`. `detection_counts` runs its
 loose pass with `MatchScope(radius, strict=False)` and its strict pass with
 `MatchScope(min(3.0, radius), strict=True)`, exactly the fork's two radii.
 The tick check (report at or after the fire) stays in core; the matcher
-only answers "is this report about this fire". The compose matcher reads
-`scope.strict` (same service vs one dependency hop) and ignores `radius`.
+only answers "is this report about this fire". The compose substrate keeps
+`position_matcher`: its services sit on synthetic positions 20 units apart
+(`wrench_compose/positions.py`), so both the strict (3) and the loose (10)
+radius match exactly the named service and strict == loose there; which
+services a fire names is the manifest's job (`wrench_compose/manifest.py`,
+e.g. a `belt_cut` lists the workers, `netproxy` and `redis`).
 `_report_position` / `_affected_positions` are unchanged and feed
 `position_matcher`.
 
