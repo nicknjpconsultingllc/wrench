@@ -8,14 +8,8 @@ import time
 from pathlib import Path
 
 from wrench_compose.episode import ROOT, run_episode
+from wrench_compose.kinds import KINDS, SEED_GATEWAY, SEED_WORKER
 from wrench_compose.report import one_line, score_run
-
-KINDS = ["entity_destruction", "belt_cut", "resource_exhaustion", "adaptive_strike"]
-# Seeds chosen against the default 2-worker topology (candidates sorted:
-# gateway-1, worker-1, worker-2): seed 3 -> worker (redundant, TR~0.6 no-op),
-# seed 1 -> gateway (SPOF, floor test).
-SEED_WORKER = 3
-SEED_GATEWAY = 1
 
 
 def _run(name, kind, seed, agent, **kw):

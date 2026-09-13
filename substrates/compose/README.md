@@ -38,12 +38,14 @@ only when the stamp verifies. Nothing inside the factory can mint throughput
 ```bash
 make venv            # uv venv + pip install -e .[dev] -e ./wrenchctl
 make build           # wrench-svc:local (all admin/factory Python services) + wrench-agent:local (the sandbox)
-make test            # 34 unit tests, no Docker
+make test            # 86 unit tests, no Docker (inspect-ai + verifiers installed by make venv)
 make test-partition  # 9 anti-gaming checks from inside the sandbox, ~1 min with Docker
 make test-live       # every compose_live test: partition + bracketing + 4 no-op floor cells, ~25 min
 make demo            # no-op vs oracle on entity_destruction, ~8 min
 make jitter          # 10 no-op replays x 2 kinds + 3 oracle replays x 2 kinds
 make floor           # 4 kinds x {noop, restart_all, oracle}
+make test-driver     # LLM path end to end with mockllm + the scripted operator, ~7 min with Docker
+make table-smoke     # run_table.py with mockllm on 2 kinds x 1 seed, 2 slots
 .venv/bin/python -m wrench_compose run --name x --kind belt_cut --seed 1 --agent oracle
 .venv/bin/python -m wrench_compose score runs/x
 ```
@@ -149,6 +151,128 @@ manifest and applies the repair in the table above). All three act through
 never through an admin path, so a passing bracket proves the sandbox's
 surface is sufficient to recover from every kind.
 
+## LLM driver: `ComposeEpisode`, the Inspect task, the table
+
+`wrench_compose/episode.py::ComposeEpisode` is the LLM path, with the same
+turn protocol as the Factorio substrate's `WrenchEpisode`
+(`fle/disruptions/episode.py`): `start()` brings the stack up and arms the
+spec, `system_prompt()`, `observe()` -> text, `step(command)` -> feedback,
+`skip_step` / `fail_step` for the two model-side failure paths, `is_done`,
+`drain()`, `finalize()` -> dict, `cleanup()`. One driver on each side of the
+contract, one class in the middle.
+
+- **Action** = one shell command line, run as
+  `docker exec <sandbox> timeout 120 sh -c <command>` (so `wrenchctl ...`
+  plus ordinary shell), stdout/stderr returned with a 6000-byte cap each and
+  the exit code. The reply's first fenced block supplies the command
+  (`parse_command`); a prose-only reply consumes the turn with a
+  "no command" notice, exactly as a no-code-block reply does in Factorio.
+- **Observation** = last feedback + `wrenchctl ps` + `wrenchctl metrics`,
+  rendered by the sandbox's own `wrenchctl`. Never the probe's samples or
+  the ledger; `tests/test_prompt_leak.py` renders the full system prompt, an
+  observation from a canned episode after its fire, and every `wrenchctl`
+  output format, and asserts none of them names a fault kind, a seed, the
+  ledger, HMAC or an admin service.
+- **Turns**: budget 30 (`turns=`), at least 6 s between two executed
+  commands (`turn_period_s=`; 30 x 6 s covers the 60 s arming baseline plus
+  the 120 s window even when the model answers instantly). The episode never
+  ends early on quota; `finalize()` waits for the fire and then to the
+  window end whatever the agent did, so a five-turn mockllm episode and a
+  thirty-turn real one are scored on the same window. By default the turn
+  loop stops once the window has closed (`stop_after_window=True`): nothing
+  after it is scored, so those turns would only cost money.
+- **Scoring**: `wrench_core.metrics.episode_metrics` with `COMPOSE_CONFIG`,
+  `end_tick` clipped to `fire_tick + window_ms`. `finalize()` returns the
+  fork's dict shape (samples, ledger events, fires, quota_met, end_tick,
+  shaped rewards, `metrics` scalars, `scores` blocks) and writes
+  `runs/<name>/{samples.jsonl,ledger.jsonl,episode.json}` so
+  `python -m wrench_compose score` works on LLM runs too.
+
+### Inspect
+
+```bash
+.venv/bin/inspect eval wrench_compose/inspect_task.py@compose_sentinel \
+    -T kinds=entity_destruction,belt_cut -T seeds=1,3 -T turns=30 \
+    --model openrouter/anthropic/claude-sonnet-4.6
+.venv/bin/inspect eval wrench_compose/inspect_task.py@compose_sentinel \
+    -T kinds=entity_destruction -T seeds=3 -T turns=5 --model mockllm/model      # no API key
+.venv/bin/inspect eval wrench_compose/inspect_task.py@compose_sentinel \
+    -T kinds=entity_destruction -T seeds=3 --model compose-scripted/operator     # scripted repair policy
+```
+
+`wrench_compose/inspect_task.py` mirrors `fle/eval/inspect/wrench.py`: the
+solver is Inspect's message/generate loop around `ComposeEpisode` (system
+prompt + the most recent 24 messages per call, `max_tokens` 1024, bounded
+retries), it copies the episode into a `ComposeData` store after every turn,
+and its outer `try/except` records `ComposeData.error` and returns normally,
+so an infrastructure failure is an error row, never a crashed eval. The
+scorers `throughput_retained` / `recovery` / `detection` are pure readers of
+that store through `episode_metrics` and carry the same value/metadata
+shapes as the fork's (`pooled_numerator` / `pooled_denominator`,
+floor-adjusted pair, per-fire breakdowns, detection counts). One episode per
+compose slot: `WRENCH_COMPOSE_SLOTS` (default 1) sizes
+`wrench_compose/slots.py::slot_pool`, slot `k` owning `10.232.k.0/24` and
+`10.231.k.0/24`; samples past that count wait for a free slot.
+
+`compose-scripted/operator` (`wrench_compose/policy.py`, registered as an
+Inspect model provider through the `inspect_ai` entry point) is a scripted
+operator that reads only what a model would (system prompt, observations,
+its own replies) and answers one `wrenchctl` command per turn: a service
+below its replica count is rebuilt with `scale` and then reported; a
+throughput collapse with every replica present reads the worker logs once
+and re-routes the worker->redis hop or revokes the `analytics` role's
+connections. It proves that the model path (reply -> sandbox shell ->
+probe) can recover, not just the fixture agents that read the fired
+manifest.
+
+### The comparison table
+
+```bash
+WRENCH_COMPOSE_SLOTS=2 .venv/bin/python scripts/run_table.py \
+    --models openrouter/anthropic/claude-sonnet-4.6,openrouter/openai/gpt-5-mini \
+    --kinds entity_destruction,belt_cut,resource_exhaustion,adaptive_strike --seeds 1,3
+.venv/bin/python scripts/run_table.py --models mockllm/model --kinds entity_destruction,belt_cut --seeds 3 --turns 5
+```
+
+`scripts/run_table.py` is the fork's `scripts/run_table.py` over the compose
+task: models x kinds x seeds through `inspect_ai.eval_set` (interrupted runs
+resume with `--resume <run dir>`), per-episode rows, per-(model, kind)
+aggregates by the pooled-ratio rule (sum numerators / sum denominators,
+never mean of ratios), time-to-recovery pooled through
+`wrench_core.survival.pooled_time_to_recovery` (Kaplan-Meier median and
+restricted mean per (model, kind), censored fires kept at risk until the
+window end), Markdown + JSON under `table_runs/<stamp>/` and the episodes'
+run directories under `table_runs/<stamp>/episodes/`. An episode is an
+error row when `sample.error` is set **or** the store's `ComposeData:error`
+is non-empty: the solver returns normally after an infrastructure failure,
+so `sample.error` alone would report it as a genuine 0-fire success (the
+fork found this the hard way).
+
+### verifiers
+
+```bash
+uv pip install -e environments/wrench_compose_env --no-deps
+WRENCH_COMPOSE_SLOTS=2 vf-eval wrench-compose-env -m <model> -n 8 -r 1 -c 2 -a '{"seeds": "1,3"}' -C wrench -s
+```
+
+`environments/wrench_compose_env/` mirrors `environments/wrench_factorio`
+in the fork: a `MultiTurnEnv` around `ComposeEpisode` (dataset = kinds x
+seeds, reward = pooled winsorized TR, every other metric at weight 0,
+`tr_scoreable` to filter on), so the Hub can host both substrates.
+
+### Cost and time
+
+An episode is ~200 s wall clock (2.5-3.5 s bring-up, fault at ~61 s, 120 s
+window, 7 s teardown) plus model latency, on one slot; `WRENCH_COMPOSE_SLOTS`
+runs that many in parallel (each stack wants ~4 CPUs). A turn is one
+command, so context stays small: the system prompt is ~860 tokens
+(cl100k), an observation ~350, a reply ~15; with the 24-message window a
+model call is at most ~5.3k prompt tokens and a full 30-turn episode sends
+~145k prompt tokens in total (~4.8k per turn on average). With the default
+`stop_after_window`, a model that answers in 5-10 s takes 15-20 turns before
+the window closes, so 70-100k prompt tokens per episode is the realistic
+figure.
+
 ## Run-time secrets
 
 Nothing secret is checked in. Per run, `wrench_compose.episode.write_secrets`
@@ -186,9 +310,9 @@ nothing named after the probe.
 
 ## What is still stubbed
 
-- No LLM driver yet: `system_prompt` exists and the fixtures drive
-  `wrenchctl` through `docker exec`, but nothing wires a model to the sandbox
-  shell.
+- The scripted operator (`compose-scripted/operator`) repairs replica loss
+  from `ps` alone; its `belt_cut` / `resource_exhaustion` branches key off
+  worker logs and are exercised only by unit tests so far.
 - One image (`wrench-svc:local`) for gateway/worker and for the admin
   services, so a factory container's filesystem holds the admin services'
   source (not their secrets). A split image would remove that.
@@ -211,3 +335,15 @@ sandbox's `wrenchctl` recovers every kind: TR 0.985 / 0.996 / 0.996 / 0.987
 detection precision 1.0 / recall 1.0, latency 564-818 ms. Floor and
 bracketing tables for all four kinds are in the same file, with the raw runs
 under `runs/`.
+
+LLM path (`make test-driver`, `make table-smoke`, seed 3 = worker-1
+victim): `mockllm/model` through the Inspect task, 5 turns, scores exactly
+like the no-op replay (TR 0.621 = 599/964, recovery 0, recall 0,
+`ComposeData.error` empty, 196 s wall). `compose-scripted/operator`
+through the same task rebuilds the worker 10.2 s after the fire
+(`scale worker 2` at 71.2 s, fire at 61.0 s), reports it at 77.4 s
+(detection latency 16.4 s, precision 1.0, recall 1.0) and scores TR 0.996
+(960/964), recovered at 30.5 s. `run_table.py` with mockllm on
+`entity_destruction,belt_cut` x seed 3 on two slots finishes in 3.5 min
+with no error rows: TR 0.625 (floor-adj 0.250) and 0.110, both censored in
+the Kaplan-Meier pool.

@@ -11,9 +11,12 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import pytest
 
+from wrench_compose.episode import INITIAL_FEEDBACK, ComposeEpisode, format_feedback, format_observation
 from wrench_compose.prompt import system_prompt
 from wrenchctl import render
 from wrenchctl.cli import build_parser
+
+from fakes import FakeSandbox, FakeStack
 
 FORBIDDEN = [
     # what the ledger records
@@ -41,6 +44,14 @@ FORBIDDEN = [
     "pghog",
     "hog",
     "docker.sock",
+    # the drivers
+    "oracle",
+    "noop",
+    "fixture",
+    "window_ms",
+    "quota_fraction",
+    "inspect",
+    "verifiers",
 ]
 
 PS_SAMPLE = [
@@ -83,9 +94,37 @@ def all_help_text() -> str:
     return "\n".join(texts)
 
 
+def canned_observation(tmp_path=None) -> str:
+    """A real ComposeEpisode's observation after one executed turn, over a
+    fake stack (the probe side is what must stay invisible)."""
+    ep = ComposeEpisode(
+        "entity_destruction",
+        3,
+        turns=30,
+        turn_period_s=0,
+        out_root=tmp_path,
+        name="leak",
+        stack_factory=FakeStack,
+        sandbox_factory=FakeSandbox,
+    ).start()
+    ep.stack.tick_step = 70000  # past the fire
+    ep.step("wrenchctl restart gateway")
+    obs = ep.observe()
+    assert ep.fired is not None  # the fire happened and still must not show
+    return obs
+
+
 def rendered_surface() -> dict[str, str]:
     return {
         "system_prompt": system_prompt(),
+        "system_prompt_full": system_prompt(workers=2, turns=30, quota=400),
+        "initial_observation": format_observation(
+            INITIAL_FEEDBACK, 0, 30, render.ps(PS_SAMPLE), render.metrics(METRICS_SAMPLE)
+        ),
+        "feedback": format_feedback(
+            3, "wrenchctl scale worker 2", 0, render.scale({"created": ["w"], "running": ["a"]}), "", 40
+        ),
+        "observation_after_fire": canned_observation(),
         "help": all_help_text(),
         "ps": render.ps(PS_SAMPLE),
         "metrics": render.metrics(METRICS_SAMPLE),
@@ -107,10 +146,11 @@ def test_agent_facing_text_never_leaks(name):
 
 
 def test_system_prompt_names_the_tool_and_the_objective():
-    text = system_prompt(workers=2)
+    text = system_prompt(workers=2, turns=30, quota=400)
     assert "wrenchctl report_fault" in text
     assert "jobs per minute" in text
     assert "2 replicas" in text
+    assert "You have 30 turns" in text and "quota of 400" in text and "ONE shell command line" in text
     for verb in ("ps", "logs", "exec", "restart", "scale", "config", "metrics", "report_fault"):
         assert verb in text
 
