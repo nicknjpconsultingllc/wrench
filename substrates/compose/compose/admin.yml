@@ -1,8 +1,16 @@
 # The admin project: nothing in here is reachable from the agent surface.
 # loadgen, probe and toxiproxy also attach to the factory network because
 # they have to touch it (send jobs, read Postgres, sit on the worker->redis
-# hop); toxiproxy's admin API binds only to its static admin-network IP.
-# chaos is the only container holding the Docker socket.
+# hop), but every listener they have binds to a static admin-network IP:
+# toxiproxy's control API on .10, the probe on .11, chaos's admin routes on
+# .20. chaos is the only container holding the Docker socket; it also joins
+# the factory network (10.232.<slot>.20, alias `wrenchapi`) to serve the
+# agent API on 8081 there, and only there.
+# No container publishes a port: a published port is reachable from every
+# bridge on the host (and via host.docker.internal on Docker Desktop), so
+# the episode runner reaches the probe with `docker exec` instead.
+# Secrets (HMAC key, analytics password) come from files the episode runner
+# generates per run under WRENCH_SECRETS_DIR; no default exists.
 name: ${WRENCH_ADMIN_PROJECT:-wrench-admin-0}
 
 x-admin: &admin
@@ -34,7 +42,8 @@ services:
       GATEWAY_URL: http://gateway:8000
       RPS: ${WRENCH_RPS:-8}
       SEED: ${WRENCH_SEED:-1}
-      HMAC_KEY: ${WRENCH_HMAC_KEY:-dev-key}
+      HMAC_KEY_FILE: /run/secrets/hmac_key
+    secrets: [hmac_key]
     labels:
       wrench.role: admin
     networks: [admin, factory]
@@ -47,15 +56,18 @@ services:
       PG_DSN: postgresql://probe:probe@postgres:5432/factory
       REDIS_URL: redis://redis:6379/0
       GATEWAY_URL: http://gateway:8000
-      HMAC_KEY: ${WRENCH_HMAC_KEY:-dev-key}
-      CHAOS_URL: http://chaos:8080
+      HMAC_KEY_FILE: /run/secrets/hmac_key
+      CHAOS_URL: http://10.231.${WRENCH_SLOT:-0}.20:8080
+      BIND: 10.231.${WRENCH_SLOT:-0}.11
       SAMPLE_MS: ${WRENCH_SAMPLE_MS:-500}
       ITEM: jobs_done
-    ports:
-      - "127.0.0.1:${WRENCH_PROBE_PORT:-9012}:8080"
+    secrets: [hmac_key]
     labels:
       wrench.role: admin
-    networks: [admin, factory]
+    networks:
+      admin:
+        ipv4_address: 10.231.${WRENCH_SLOT:-0}.11
+      factory: {}
 
   chaos:
     <<: *admin
@@ -66,17 +78,29 @@ services:
       FACTORY_NET: ${WRENCH_FACTORY_NET:-wrench_factory_0}
       ADMIN_PROJECT: ${WRENCH_ADMIN_PROJECT:-wrench-admin-0}
       TOXIPROXY_URL: http://10.231.${WRENCH_SLOT:-0}.10:8474
-      PROBE_URL: http://probe:8080
+      PROBE_URL: http://10.231.${WRENCH_SLOT:-0}.11:8080
+      ADMIN_BIND: 10.231.${WRENCH_SLOT:-0}.20
+      AGENT_BIND: 10.232.${WRENCH_SLOT:-0}.20
       HOG_IMAGE: wrench-svc:local
-      HOG_DSN: postgresql://analytics:analytics@postgres:5432/factory
+      ANALYTICS_PASSWORD_FILE: /run/secrets/analytics_password
       SCALE_CAP: "4"
+    secrets: [analytics_password]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "127.0.0.1:${WRENCH_CHAOS_PORT:-9011}:8080"
     labels:
       wrench.role: admin
-    networks: [admin]
+    networks:
+      admin:
+        ipv4_address: 10.231.${WRENCH_SLOT:-0}.20
+      factory:
+        ipv4_address: 10.232.${WRENCH_SLOT:-0}.20
+        aliases: [wrenchapi]
+
+secrets:
+  hmac_key:
+    file: ${WRENCH_SECRETS_DIR:-/wrench-secrets-unset}/hmac.key
+  analytics_password:
+    file: ${WRENCH_SECRETS_DIR:-/wrench-secrets-unset}/analytics.pw
 
 networks:
   admin:

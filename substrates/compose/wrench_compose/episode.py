@@ -1,16 +1,17 @@
-"""Episode runner: bring up both compose projects, arm the spec, wait for the
-fire, run a fixture agent, run to window end, tear down, write
-samples.jsonl + ledger.jsonl + episode.json under runs/<name>/."""
+"""Episode runner: generate the run's secrets, bring up both compose projects,
+arm the spec, wait for the fire, run a fixture agent through the sandbox,
+run to window end, tear down, write samples.jsonl + ledger.jsonl +
+episode.json under runs/<name>/."""
 
 import json
 import os
 import secrets
+import shutil
 import subprocess
 import time
 from pathlib import Path
 
-from wrench_compose.agents import AGENTS, AgentClient
-from wrench_compose.httpjson import get, post
+from wrench_compose.agents import AGENTS, AgentError, Wrenchctl
 from wrench_compose.ledger import write_jsonl
 from wrench_compose.report import score_run
 
@@ -30,7 +31,7 @@ def compose(env, file, *args, **kw):
     return _sh(["docker", "compose", "-f", str(COMPOSE / file), *args], env, **kw)
 
 
-def slot_env(slot: int, cfg: dict) -> dict:
+def slot_env(slot: int, cfg: dict, secrets_dir: Path) -> dict:
     env = dict(os.environ)
     env.update(
         {
@@ -39,36 +40,98 @@ def slot_env(slot: int, cfg: dict) -> dict:
             "WRENCH_ADMIN_PROJECT": f"wrench-admin-{slot}",
             "WRENCH_FACTORY_NET": f"wrench_factory_{slot}",
             "WRENCH_ADMIN_NET": f"wrench_admin_{slot}",
-            "WRENCH_PROBE_PORT": str(9012 + 10 * slot),
-            "WRENCH_CHAOS_PORT": str(9011 + 10 * slot),
+            "WRENCH_SECRETS_DIR": str(secrets_dir),
             "WRENCH_WORKERS": str(cfg["workers"]),
             "WRENCH_RPS": str(cfg["rps"]),
             "WRENCH_SEED": str(cfg["seed"]),
-            "WRENCH_HMAC_KEY": cfg["hmac_key"],
             "WRENCH_WORK_ITERS": str(cfg["work_iters"]),
             "WRENCH_SAMPLE_MS": str(cfg["sample_ms"]),
-            "WRENCH_WORK_MODE": cfg.get("work_mode", "iters"),
+            "WRENCH_WORK_MODE": cfg.get("work_mode", "cputime"),
             "WRENCH_WORK_CPU_MS": str(cfg.get("work_cpu_ms", 195)),
             "WRENCH_IMAGE": cfg.get("image", "wrench-svc:local"),
+            "WRENCH_AGENT_IMAGE": cfg.get("agent_image", "wrench-agent:local"),
         }
     )
     return env
 
 
-def teardown(env, slot: int):
+def write_secrets(secrets_dir: Path) -> None:
+    """Per-run secrets, mounted as Docker secrets into admin containers only:
+    the HMAC key (loadgen signs, probe verifies) and the analytics password
+    (chaos sets it on postgres and hands it to the hog). Removed at teardown."""
+    secrets_dir.mkdir(parents=True, exist_ok=True)
+    os.chmod(secrets_dir, 0o700)
+    for name, value in (("hmac.key", secrets.token_hex(32)), ("analytics.pw", secrets.token_urlsafe(24))):
+        path = secrets_dir / name
+        path.write_text(value + "\n")
+        os.chmod(path, 0o600)
+
+
+def agent_container(slot: int) -> str:
+    return f"wrench-factory-{slot}-agent-1"
+
+
+def wait_agent_surface(ctl: Wrenchctl, timeout_s: float = 60) -> list:
+    """Until `wrenchctl ps` answers from inside the sandbox (chaos has
+    snapshotted the blueprint and opened the agent listener)."""
+    t = time.monotonic()
+    last = None
+    while time.monotonic() - t < timeout_s:
+        try:
+            ps = ctl.ps()
+            if ps:
+                return ps
+        except (AgentError, subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
+            last = e
+        time.sleep(0.5)
+    raise EpisodeError(f"agent surface not reachable from the sandbox after {timeout_s}s: {last}")
+
+
+def teardown(env, slot: int, secrets_dir: Path | None = None):
     subprocess.run(["docker", "rm", "-f", f"wrench-admin-{slot}-pghog"], env=env, capture_output=True, check=False)
     compose(env, "admin.yml", "down", "-v", "--remove-orphans", "-t", "3", check=False, capture=True)
     compose(env, "factory.yml", "down", "-v", "--remove-orphans", "-t", "3", check=False, capture=True)
+    if secrets_dir is not None:
+        shutil.rmtree(secrets_dir, ignore_errors=True)
 
 
-def wait_http(url: str, timeout_s: float = 60):
-    t = time.monotonic()
-    while time.monotonic() - t < timeout_s:
-        try:
-            return get(url, timeout=2)
-        except Exception:  # noqa: BLE001
-            time.sleep(0.5)
-    raise EpisodeError(f"{url} not reachable after {timeout_s}s")
+class ProbeClient:
+    """Host-side access to the probe. Nothing on the admin side publishes a
+    port (a published port is reachable from every bridge on the host), so
+    each call is `docker exec <probe> python -m wrench_compose.httpjson`."""
+
+    def __init__(self, slot: int):
+        self.container = f"wrench-admin-{slot}-probe-1"
+        self.base = f"http://10.231.{slot}.11:8080"
+
+    def request(self, method: str, path: str, body: dict | None = None, timeout: float = 30.0):
+        argv = ["docker", "exec", self.container, "python", "-m", "wrench_compose.httpjson", method, self.base + path]
+        if body is not None:
+            argv.append(json.dumps(body))
+        argv.append(str(timeout))
+        r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout + 15)
+        if r.returncode != 0 or not r.stdout.strip():
+            raise EpisodeError(
+                f"probe {method} {path}: exit {r.returncode} {r.stdout.strip()[:300]} {r.stderr.strip()[-300:]}"
+            )
+        return json.loads(r.stdout)
+
+    def get(self, path: str, timeout: float = 30.0):
+        return self.request("GET", path, None, timeout)
+
+    def post(self, path: str, body: dict | None = None, timeout: float = 30.0):
+        return self.request("POST", path, body or {}, timeout)
+
+    def wait(self, timeout_s: float = 60):
+        t = time.monotonic()
+        last = None
+        while time.monotonic() - t < timeout_s:
+            try:
+                return self.get("/status", timeout=2)
+            except (EpisodeError, subprocess.TimeoutExpired) as e:
+                last = e
+                time.sleep(0.5)
+        raise EpisodeError(f"probe not reachable after {timeout_s}s: {last}")
 
 
 def run_episode(
@@ -86,9 +149,10 @@ def run_episode(
     workers: int = 2,
     rps: float = 8.0,
     work_iters: int = 1000000,
-    work_mode: str = "iters",
+    work_mode: str = "cputime",
     work_cpu_ms: int = 195,
     image: str = "wrench-svc:local",
+    agent_image: str = "wrench-agent:local",
     sample_ms: int = 500,
     slot: int = 0,
     fire_timeout_s: float = 240,
@@ -115,29 +179,30 @@ def run_episode(
         "work_mode": work_mode,
         "work_cpu_ms": work_cpu_ms,
         "image": image,
+        "agent_image": agent_image,
         "sample_ms": sample_ms,
         "slot": slot,
-        "hmac_key": secrets.token_hex(16),
         "label": label,
     }
-    env = slot_env(slot, cfg)
-    probe = f"http://127.0.0.1:{env['WRENCH_PROBE_PORT']}"
-    chaos = f"http://127.0.0.1:{env['WRENCH_CHAOS_PORT']}"
+    secrets_dir = run_dir / ".secrets"
+    env = slot_env(slot, cfg, secrets_dir)
+    probe = ProbeClient(slot)
+    ctl = Wrenchctl(agent_container(slot))
     timing = {"t_start": time.time()}
-    result = {"config": {k: v for k, v in cfg.items() if k != "hmac_key"}, "timing": timing, "error": None}
+    result = {"config": dict(cfg), "timing": timing, "error": None}
     teardown(env, slot)
     try:
+        write_secrets(secrets_dir)
         t = time.monotonic()
         compose(env, "factory.yml", "up", "-d", "--wait", "--quiet-pull", capture=True)
         timing["factory_up_s"] = round(time.monotonic() - t, 1)
         t = time.monotonic()
         compose(env, "admin.yml", "up", "-d", "--quiet-pull", capture=True)
-        wait_http(probe + "/status")
-        wait_http(chaos + "/agent/ps")
-        post(chaos + "/chaos/blueprint")
+        probe.wait()
+        wait_agent_surface(ctl)
         timing["admin_up_s"] = round(time.monotonic() - t, 1)
-        armed = post(
-            probe + "/arm",
+        armed = probe.post(
+            "/arm",
             {
                 "kind": kind,
                 "seed": seed,
@@ -155,7 +220,7 @@ def run_episode(
         t = time.monotonic()
         fired = None
         while time.monotonic() - t < fire_timeout_s:
-            st = get(probe + "/status", timeout=5)
+            st = probe.get("/status", timeout=5)
             if st["resolved"]:
                 fired = st["resolved"][0]
                 break
@@ -164,24 +229,24 @@ def run_episode(
             raise EpisodeError(f"no fire within {fire_timeout_s}s; last status {st}")
         timing["fire_wall_s"] = round(time.monotonic() - t, 1)
         result["fired"] = fired
-        agent = AGENTS[agent_name](AgentClient(chaos), cfg)
+        agent = AGENTS[agent_name](ctl, cfg)
         if fired["event"] == "fired":
             t = time.monotonic()
             agent.on_fire(fired)
             timing["agent_on_fire_s"] = round(time.monotonic() - t, 2)
             end_tick = fired["tick"] + window_ms + 3 * sample_ms
-            while get(probe + "/status", timeout=5)["tick"] < end_tick:
+            while probe.get("/status", timeout=5)["tick"] < end_tick:
                 time.sleep(1)
         agent.finish()
         result["agent_actions"] = agent.actions
 
-        samples = get(probe + "/samples", timeout=30)
-        ledger = get(probe + "/ledger", timeout=30)
+        samples = probe.get("/samples", timeout=30)
+        ledger = probe.get("/ledger", timeout=30)
         with (run_dir / "samples.jsonl").open("w") as f:
             for s in samples:
                 f.write(json.dumps(s) + "\n")
         write_jsonl(run_dir / "ledger.jsonl", ledger)
-        status = get(probe + "/status", timeout=5)
+        status = probe.get("/status", timeout=5)
         result["probe_status"] = {k: status[k] for k in ("tick", "samples", "jobs_done", "rejected", "pg_errors")}
         logs = compose(env, "admin.yml", "logs", "--no-color", "--tail", "400", check=False, capture=True).stdout
         (run_dir / "admin_logs.txt").write_text(logs)
@@ -193,7 +258,7 @@ def run_episode(
         result["error"] = f"{type(e).__name__}: {e} {detail[-2000:]}"
     finally:
         t = time.monotonic()
-        teardown(env, slot)
+        teardown(env, slot, secrets_dir)
         timing["teardown_s"] = round(time.monotonic() - t, 1)
         timing["t_end"] = time.time()
         timing["wall_s"] = round(timing["t_end"] - timing["t_start"], 1)

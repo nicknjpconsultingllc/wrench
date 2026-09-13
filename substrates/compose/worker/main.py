@@ -13,18 +13,23 @@ import time
 import psycopg
 import redis
 
+from wrench_compose.httpjson import serve
+
 REDIS_URL = os.environ.get("REDIS_URL", "redis://netproxy:6379/0")
 PG_DSN = os.environ.get("PG_DSN", "postgresql://worker:worker@postgres:5432/factory")
 WORK_ITERS = int(os.environ.get("WORK_ITERS", "1000000"))
-# "iters": a fixed number of sha256 iterations (fixed work; wall time follows
-# core speed). "cputime": spin until this process has consumed WORK_CPU_MS of
+# "cputime" (default): spin until this process has consumed WORK_CPU_MS of
 # CPU time (fixed CPU time; wall time independent of core speed, only of
-# contention) -- see docs/jitter_study.md for why this knob exists.
-WORK_MODE = os.environ.get("WORK_MODE", "iters")
+# contention). "iters": a fixed number of sha256 iterations (fixed work; wall
+# time follows core speed) -- see docs/jitter_study.md for why the default
+# is cputime.
+WORK_MODE = os.environ.get("WORK_MODE", "cputime")
 WORK_CPU_MS = int(os.environ.get("WORK_CPU_MS", "195"))
 STREAM, GROUP = "jobs", "workers"
 CONSUMER = socket.gethostname()
 AUTOCLAIM_EVERY = 10  # loops; stale PEL entries of dead workers get re-run
+METRICS_PORT = int(os.environ.get("METRICS_PORT", "8000"))
+stats = {"done": 0, "started_at": time.time()}  # read by the agent API's `metrics`
 
 
 def do_work(iters: int) -> str:
@@ -71,6 +76,7 @@ def commit(job_id: str, sig: str) -> None:
 
 def main():
     print(f"worker {CONSUMER} redis={REDIS_URL} mode={WORK_MODE} iters={WORK_ITERS} cpu_ms={WORK_CPU_MS}", flush=True)
+    serve(METRICS_PORT, {("GET", "/metrics"): lambda _q, _b: (200, {"consumer": CONSUMER, **stats})})
     r = None
     loops = 0
     done = 0
@@ -93,6 +99,7 @@ def main():
                 commit(fields["job_id"], fields["sig"])
                 r.xack(STREAM, GROUP, mid)
                 done += 1
+                stats["done"] = done
                 if done % 50 == 0:
                     print(f"done={done}", flush=True)
         except redis.ResponseError as e:

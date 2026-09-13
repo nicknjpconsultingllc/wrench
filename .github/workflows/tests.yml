@@ -28,5 +28,5 @@ jobs:
       - name: Compose substrate unit tests (no Docker)
         working-directory: substrates/compose
         run: |
-          uv venv && uv pip install -e '.[dev]'
+          uv venv && uv pip install -e '.[dev]' -e ./wrenchctl
           uv run --no-sync pytest tests -q

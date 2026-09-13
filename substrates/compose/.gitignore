@@ -7,3 +7,4 @@ runs/*/admin_logs.txt
 runs/*/factory_logs.txt
 runs/*.log
 runs/pipeline*.sh
+runs/*/.secrets/

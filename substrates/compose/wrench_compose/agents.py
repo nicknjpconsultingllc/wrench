@@ -1,47 +1,75 @@
-"""The agent surface client (what `wrenchctl` wraps) and the scripted fixture
-agents: noop, restart_all, oracle."""
+"""The agent surface as the sandbox sees it (`wrenchctl` run inside the agent
+container) and the scripted fixture agents: noop, restart_all, oracle.
 
+Fixtures never touch an admin path: every action is `docker exec <sandbox>
+wrenchctl --json ...`, so a passing bracket proves the agent-visible surface
+is sufficient to recover from every kind."""
+
+import json
+import subprocess
 import threading
 import time
 
-from wrench_compose.httpjson import HttpError, get, post
+
+class AgentError(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.payload = message
 
 
-class AgentClient:
-    """Python client for the allowlisted /agent/* API."""
+class Wrenchctl:
+    """Runs wrenchctl inside the sandbox container and parses its --json output."""
 
-    def __init__(self, base_url: str):
-        self.base = base_url.rstrip("/")
+    def __init__(self, container: str):
+        self.container = container
+
+    def _run(self, *args: str, timeout: float = 180) -> object:
+        r = subprocess.run(
+            ["docker", "exec", self.container, "wrenchctl", "--json", *args],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        payload = None
+        if r.stdout.strip():
+            try:
+                payload = json.loads(r.stdout)
+            except json.JSONDecodeError:
+                payload = r.stdout
+        if r.returncode != 0:
+            msg = payload.get("error") if isinstance(payload, dict) else None
+            raise AgentError(msg or r.stderr.strip() or f"wrenchctl exited {r.returncode}")
+        return payload
 
     def ps(self):
-        return get(self.base + "/agent/ps")
+        return self._run("ps")
 
     def logs(self, service: str, tail: int = 50):
-        return get(f"{self.base}/agent/logs?service={service}&tail={tail}")
+        return self._run("logs", service, "--tail", str(tail))
 
-    def exec(self, service: str, cmd):
-        return post(self.base + "/agent/exec", {"service": service, "cmd": cmd}, timeout=60)
+    def exec(self, service: str, cmd: list[str]):
+        return self._run("exec", service, "--", *cmd)
 
     def restart(self, service: str):
-        return post(self.base + "/agent/restart", {"service": service}, timeout=60)
+        return self._run("restart", service)
 
     def scale(self, service: str, replicas: int):
-        return post(self.base + "/agent/scale", {"service": service, "replicas": replicas}, timeout=120)
+        return self._run("scale", service, str(replicas))
 
     def config(self, service: str, env: dict):
-        return post(self.base + "/agent/config", {"service": service, "env": env}, timeout=120)
+        return self._run("config", "edit", service, *[f"{k}={v}" for k, v in env.items()])
 
     def metrics(self):
-        return get(self.base + "/agent/metrics")
+        return self._run("metrics")
 
     def report_fault(self, service: str, cause: str):
-        return post(self.base + "/agent/report_fault", {"service": service, "cause": cause})
+        return self._run("report_fault", service, cause)
 
 
 class Agent:
     name = "base"
 
-    def __init__(self, client: AgentClient, cfg: dict):
+    def __init__(self, client: Wrenchctl, cfg: dict):
         self.client = client
         self.cfg = cfg
         self.stop = threading.Event()
@@ -59,8 +87,8 @@ class Agent:
             res = fn(*a)
             self.actions.append({"action": label, "args": a, "ok": True, "ms": int((time.monotonic() - t) * 1000)})
             return res
-        except HttpError as e:
-            self.actions.append({"action": label, "args": a, "ok": False, "error": str(e.payload)})
+        except (AgentError, subprocess.TimeoutExpired) as e:
+            self.actions.append({"action": label, "args": a, "ok": False, "error": str(e)})
             return None
 
 
@@ -89,7 +117,7 @@ class RestartAll(Agent):
 
 class Oracle(Agent):
     """Knows the fault from the manifest and repairs it immediately, using
-    only the agent surface."""
+    only wrenchctl from inside the sandbox."""
 
     name = "oracle"
 
