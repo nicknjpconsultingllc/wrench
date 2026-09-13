@@ -335,3 +335,15 @@ sandbox's `wrenchctl` recovers every kind: TR 0.985 / 0.996 / 0.996 / 0.987
 detection precision 1.0 / recall 1.0, latency 564-818 ms. Floor and
 bracketing tables for all four kinds are in the same file, with the raw runs
 under `runs/`.
+
+LLM path (`make test-driver`, `make table-smoke`, seed 3 = worker-1
+victim): `mockllm/model` through the Inspect task, 5 turns, scores exactly
+like the no-op replay (TR 0.621 = 599/964, recovery 0, recall 0,
+`ComposeData.error` empty, 196 s wall). `compose-scripted/operator`
+through the same task rebuilds the worker 10.2 s after the fire
+(`scale worker 2` at 71.2 s, fire at 61.0 s), reports it at 77.4 s
+(detection latency 16.4 s, precision 1.0, recall 1.0) and scores TR 0.996
+(960/964), recovered at 30.5 s. `run_table.py` with mockllm on
+`entity_destruction,belt_cut` x seed 3 on two slots finishes in 3.5 min
+with no error rows: TR 0.625 (floor-adj 0.250) and 0.110, both censored in
+the Kaplan-Meier pool.

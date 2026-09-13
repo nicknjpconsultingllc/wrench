@@ -8,3 +8,5 @@ runs/*/factory_logs.txt
 runs/*.log
 runs/pipeline*.sh
 runs/*/.secrets/
+table_runs/
+logs/
