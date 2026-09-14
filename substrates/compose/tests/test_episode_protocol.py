@@ -309,3 +309,25 @@ class TestComposeArgv:
         argv = compose_argv(env, "admin.yml", "down", "-v")
         assert argv[argv.index("-p") + 1] == "wrench-admin-1" and argv[-2:] == ["down", "-v"]
         assert compose_argv(slot_env(0, default_config(seed=1), tmp_path), "factory.yml")[5] == "wrench-factory-0"
+
+
+def test_slot_env_secrets_dir_is_absolute(tmp_path, monkeypatch):
+    """Compose resolves a relative secrets ``file:`` against compose/, not the
+    cwd; a relative run dir (run_table.py --outdir table_runs) must still
+    mount the real secret files."""
+    from pathlib import Path
+
+    from wrench_compose.episode import slot_env
+
+    monkeypatch.chdir(tmp_path)
+    cfg = {"workers": 2, "rps": 8, "seed": 1, "work_iters": 1, "sample_ms": 500}
+    env = slot_env(0, cfg, Path("table_runs/x/.secrets"))
+    assert Path(env["WRENCH_SECRETS_DIR"]).is_absolute()
+    assert env["WRENCH_SECRETS_DIR"] == str(tmp_path.resolve() / "table_runs/x/.secrets")
+
+
+def test_command_failed_carries_stderr():
+    from wrench_compose.episode import CommandFailed
+
+    err = CommandFailed(1, ["docker", "compose", "up"], output="", stderr="Error response from daemon: boom")
+    assert "boom" in str(err)

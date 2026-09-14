@@ -75,8 +75,20 @@ class EpisodeError(RuntimeError):
     pass
 
 
+class CommandFailed(subprocess.CalledProcessError):
+    """CalledProcessError whose message carries the captured stderr, so an
+    episode error row says *why* a compose/docker command failed."""
+
+    def __str__(self) -> str:
+        tail = (self.stderr or "").strip()[-2000:]
+        return f"{super().__str__()}\nstderr: {tail}" if tail else super().__str__()
+
+
 def _sh(args, env, check=True, capture=False, timeout=300):
-    return subprocess.run(args, env=env, check=check, capture_output=capture, text=True, timeout=timeout)
+    res = subprocess.run(args, env=env, check=False, capture_output=capture, text=True, timeout=timeout)
+    if check and res.returncode != 0:
+        raise CommandFailed(res.returncode, args, output=res.stdout, stderr=res.stderr)
+    return res
 
 
 # Which slot_env() variable names each compose file's project.
@@ -126,7 +138,9 @@ def slot_env(slot: int, cfg: dict, secrets_dir: Path) -> dict:
             "WRENCH_ADMIN_PROJECT": f"wrench-admin-{slot}",
             "WRENCH_FACTORY_NET": f"wrench_factory_{slot}",
             "WRENCH_ADMIN_NET": f"wrench_admin_{slot}",
-            "WRENCH_SECRETS_DIR": str(secrets_dir),
+            # Absolute: compose resolves a relative secrets `file:` against the
+            # compose file's own directory, not the caller's cwd.
+            "WRENCH_SECRETS_DIR": str(Path(secrets_dir).resolve()),
             "WRENCH_WORKERS": str(cfg["workers"]),
             "WRENCH_RPS": str(cfg["rps"]),
             "WRENCH_SEED": str(cfg["seed"]),
