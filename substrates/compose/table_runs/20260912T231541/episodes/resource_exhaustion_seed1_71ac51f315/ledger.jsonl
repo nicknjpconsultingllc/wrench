@@ -1,0 +1,8 @@
+{"tick":61000,"event":"armed","kind":"resource_exhaustion","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":481.9834710743802}}
+{"tick":61000,"event":"fired","kind":"resource_exhaustion","seed":1,"affected":[{"service":"postgres","container":"wrench-factory-1-postgres-1","x":60.0,"y":0.0,"hog":"wrench-admin-1-pghog","hog_connections":16,"same_type_total":1}],"detail":{"id":1}}
+{"tick":79490,"event":"report_fault","affected":[{"service":"postgres","x":60.0,"y":0.0}],"detail":{"service":"postgres","cause":"workers failing pg inserts: connection failed with FATAL to postgres at 10.232.1.5","x":60.0,"y":0.0}}
+{"tick":85978,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-1-postgres-1"]}}
+{"tick":108857,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-1-worker-1","wrench-factory-1-worker-2"]}}
+{"tick":138627,"event":"agent_action","affected":[],"detail":{"action":"config","service":"postgres","env":{"POSTGRES_MAX_CONNECTIONS":"200"},"recreated":["wrench-factory-1-postgres-1"]}}
+{"tick":155805,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-1-worker-1","wrench-factory-1-worker-2"]}}
+{"tick":168582,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"worker","replicas":4,"created":["wrench-factory-1-worker-3","wrench-factory-1-worker-4"],"removed":[]}}

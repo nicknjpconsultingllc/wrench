@@ -15,6 +15,10 @@ probe, four fault kinds, and no-op / restart-all / oracle fixture agents.
 Its jitter study and floor tests are in `substrates/compose/docs/`.
 `docs/porting.md` lists what changed relative to the fork.
 
+The project [writeup](docs/writeup.md) covers the measurement contract, the
+adversarial hardening record, and the first model results across both
+substrates.
+
 ```
 uv venv --python 3.12 && uv sync --group dev
 uv run pytest tests -q

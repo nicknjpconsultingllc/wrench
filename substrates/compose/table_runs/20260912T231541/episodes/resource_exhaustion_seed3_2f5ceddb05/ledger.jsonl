@@ -1,0 +1,10 @@
+{"tick":61000,"event":"armed","kind":"resource_exhaustion","seed":3,"affected":[],"detail":{"id":1,"rate_per_min":481.0}}
+{"tick":61000,"event":"fired","kind":"resource_exhaustion","seed":3,"affected":[{"service":"postgres","container":"wrench-factory-0-postgres-1","x":60.0,"y":0.0,"hog":"wrench-admin-0-pghog","hog_connections":16,"same_type_total":1}],"detail":{"id":1}}
+{"tick":84909,"event":"report_fault","affected":[{"service":"postgres","x":60.0,"y":0.0}],"detail":{"service":"postgres","cause":"connection slots exhausted by foreign client; workers receive FATAL: remaining connection slots are reserved for SUPERUSER","x":60.0,"y":0.0}}
+{"tick":91429,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}
+{"tick":108127,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":142967,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"postgres","cmd":["psql","-U","postgres","-d","postgres","-c","select pid,usename,client_addr,application_name,state from pg_stat_activity"],"exit_code":0}}
+{"tick":149376,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"postgres","cmd":["psql","-U","postgres","-d","postgres","-c","select pg_terminate_backend(pid) from pg_stat_activity where usename = 'analytics'"],"exit_code":0}}
+{"tick":165994,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":181147,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"postgres","cmd":["psql","-U","postgres","-d","postgres","-c","show max_connections; select count(*) from pg_stat_activity"],"exit_code":0}}
+{"tick":187480,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"postgres","cmd":["psql","-U","postgres","-d","postgres","-c","select pid,usename,client_addr,application_name,state from pg_stat_activity"],"exit_code":0}}

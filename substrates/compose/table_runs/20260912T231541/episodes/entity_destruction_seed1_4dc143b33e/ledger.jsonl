@@ -1,0 +1,4 @@
+{"tick":60501,"event":"armed","kind":"entity_destruction","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":481.0}}
+{"tick":60501,"event":"fired","kind":"entity_destruction","seed":1,"affected":[{"service":"gateway","container":"wrench-factory-1-gateway-1","x":0.0,"y":0.0,"same_type_total":1}],"detail":{"id":1}}
+{"tick":75246,"event":"report_fault","affected":[{"service":"gateway","x":0.0,"y":0.0}],"detail":{"service":"gateway","cause":"container is gone","x":0.0,"y":0.0}}
+{"tick":81644,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"gateway","replicas":1,"created":["wrench-factory-1-gateway-1"],"removed":[]}}

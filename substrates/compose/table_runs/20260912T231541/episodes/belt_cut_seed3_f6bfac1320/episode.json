@@ -1,0 +1,372 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240.0,
+    "name": "belt_cut_seed3_f6bfac1320",
+    "kind": "belt_cut",
+    "seed": 3,
+    "agent": "llm",
+    "params": {},
+    "slot": 0
+  },
+  "timing": {
+    "factory_up_s": 2.3,
+    "admin_up_s": 1.2,
+    "teardown_s": 7.4,
+    "t_start": 1789281326.8248801,
+    "probe_status": {
+      "tick": 184151,
+      "samples": 369,
+      "jobs_done": 1435,
+      "rejected": 0,
+      "pg_errors": 0
+    },
+    "t_end": 1789281521.341552,
+    "wall_s": 194.5
+  },
+  "error": null,
+  "fired": {
+    "tick": 61008,
+    "event": "fired",
+    "kind": "belt_cut",
+    "seed": 3,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-1",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      },
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-2",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      },
+      {
+        "service": "netproxy",
+        "container": null,
+        "x": 80.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        }
+      },
+      {
+        "service": "redis",
+        "container": null,
+        "x": 20.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        }
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "turn": 0,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 233,
+      "stdout": "uptime_s          8\ngateway.admitted  68   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  1\nqueue.length      69\nqueue.pending     2\nqueue.lag         0\njobs_done         67   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=34\n  wrench-factory-0-worker-2: done=33\n",
+      "stderr": ""
+    },
+    {
+      "turn": 1,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 243,
+      "stdout": "uptime_s          18\ngateway.admitted  152   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      152\nqueue.pending     1\nqueue.lag         0\njobs_done         150   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=75\n  wrench-factory-0-worker-2: done=75\n",
+      "stderr": ""
+    },
+    {
+      "turn": 2,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 227,
+      "stdout": "uptime_s          29\ngateway.admitted  235   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      235\nqueue.pending     1\nqueue.lag         0\njobs_done         234   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=117\n  wrench-factory-0-worker-2: done=117\n",
+      "stderr": ""
+    },
+    {
+      "turn": 3,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 282,
+      "stdout": "uptime_s          37\ngateway.admitted  302   (per min, trailing 30 s: 480.7)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      302\nqueue.pending     1\nqueue.lag         0\njobs_done         300   (per min, trailing 30 s: 478.7)\n  wrench-factory-0-worker-1: done=150\n  wrench-factory-0-worker-2: done=150\n",
+      "stderr": ""
+    },
+    {
+      "turn": 4,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 262,
+      "stdout": "uptime_s          44\ngateway.admitted  360   (per min, trailing 30 s: 481.1)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      360\nqueue.pending     1\nqueue.lag         0\njobs_done         358   (per min, trailing 30 s: 479.1)\n  wrench-factory-0-worker-1: done=179\n  wrench-factory-0-worker-2: done=179\n",
+      "stderr": ""
+    },
+    {
+      "turn": 5,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 247,
+      "stdout": "uptime_s          53\ngateway.admitted  427   (per min, trailing 30 s: 481.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      427\nqueue.pending     2\nqueue.lag         0\njobs_done         425   (per min, trailing 30 s: 479.4)\n  wrench-factory-0-worker-1: done=213\n  wrench-factory-0-worker-2: done=212\n",
+      "stderr": ""
+    },
+    {
+      "turn": 6,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 247,
+      "stdout": "uptime_s          60\ngateway.admitted  485   (per min, trailing 30 s: 480.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      486\nqueue.pending     2\nqueue.lag         0\njobs_done         484   (per min, trailing 30 s: 480.4)\n  wrench-factory-0-worker-1: done=242\n  wrench-factory-0-worker-2: done=242\n",
+      "stderr": ""
+    },
+    {
+      "turn": 7,
+      "command": "wrenchctl logs worker --tail 20",
+      "exit_code": 0,
+      "ms": 333,
+      "stdout": "==> wrench-factory-0-worker-1 <==\nworker 1bbfe62c6939 redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\ndone=200\n==> wrench-factory-0-worker-2 <==\nworker 90fdf9775b30 redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\ndone=200\n",
+      "stderr": ""
+    },
+    {
+      "turn": 8,
+      "command": "wrenchctl report_fault worker \"cannot resolve netproxy hostname to connect to redis\"",
+      "exit_code": 0,
+      "ms": 257,
+      "stdout": "recorded (t=85520 ms)\n",
+      "stderr": ""
+    },
+    {
+      "turn": 9,
+      "command": "wrenchctl config edit worker REDIS_URL=redis://redis:6379/0",
+      "exit_code": 0,
+      "ms": 714,
+      "stdout": "recreated: wrench-factory-0-worker-1, wrench-factory-0-worker-2\nenv:\n  GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305\n  LANG=C.UTF-8\n  METRICS_PORT=8000\n  PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n  PG_DSN=postgresql://worker:worker@postgres:5432/factory\n  PIP_NO_CACHE_DIR=1\n  PYTHONUNBUFFERED=1\n  PYTHON_SHA256=5c8462af5790baf43a321a1559dbe0db06d1be4300fb85fb53c40060668e548a\n  PYTHON_VERSION=3.12.14\n  REDIS_URL=redis://redis:6379/0\n  WORK_CPU_MS=195\n  WORK_ITERS=1000000\n  WORK_MODE=cputime\n",
+      "stderr": ""
+    },
+    {
+      "turn": 10,
+      "command": "wrenchctl logs worker",
+      "exit_code": 0,
+      "ms": 245,
+      "stdout": "==> wrench-factory-0-worker-1 <==\nworker ec5e60cecbd0 redis=redis://redis:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://redis:6379/0\ndone=50\n==> wrench-factory-0-worker-2 <==\nworker 2bc11138f8d9 redis=redis://redis:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://redis:6379/0\ndone=50\n",
+      "stderr": ""
+    },
+    {
+      "turn": 11,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 270,
+      "stdout": "uptime_s          111\ngateway.admitted  890   (per min, trailing 30 s: 479.5)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      890\nqueue.pending     2\nqueue.lag         183\njobs_done         703   (per min, trailing 30 s: 392.0)\n  wrench-factory-0-worker-1: done=95\n  wrench-factory-0-worker-2: done=94\n",
+      "stderr": ""
+    },
+    {
+      "turn": 12,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 269,
+      "stdout": "uptime_s          118\ngateway.admitted  949   (per min, trailing 30 s: 480.1)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      949\nqueue.pending     2\nqueue.lag         168\njobs_done         777   (per min, trailing 30 s: 523.6)\n  wrench-factory-0-worker-1: done=132\n  wrench-factory-0-worker-2: done=131\n",
+      "stderr": ""
+    },
+    {
+      "turn": 13,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 225,
+      "stdout": "uptime_s          126\ngateway.admitted  1016   (per min, trailing 30 s: 481.0)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1016\nqueue.pending     2\nqueue.lag         151\njobs_done         861   (per min, trailing 30 s: 603.2)\n  wrench-factory-0-worker-1: done=174\n  wrench-factory-0-worker-2: done=173\n",
+      "stderr": ""
+    },
+    {
+      "turn": 14,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 259,
+      "stdout": "uptime_s          133\ngateway.admitted  1066   (per min, trailing 30 s: 480.6)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1066\nqueue.pending     2\nqueue.lag         139\njobs_done         923   (per min, trailing 30 s: 602.7)\n  wrench-factory-0-worker-1: done=205\n  wrench-factory-0-worker-2: done=204\n",
+      "stderr": ""
+    },
+    {
+      "turn": 15,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 282,
+      "stdout": "uptime_s          141\ngateway.admitted  1133   (per min, trailing 30 s: 479.8)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1133\nqueue.pending     2\nqueue.lag         122\njobs_done         1007   (per min, trailing 30 s: 600.2)\n  wrench-factory-0-worker-1: done=247\n  wrench-factory-0-worker-2: done=246\n",
+      "stderr": ""
+    },
+    {
+      "turn": 16,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 275,
+      "stdout": "uptime_s          150\ngateway.admitted  1208   (per min, trailing 30 s: 479.0)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1208\nqueue.pending     2\nqueue.lag         103\njobs_done         1101   (per min, trailing 30 s: 601.7)\n  wrench-factory-0-worker-1: done=294\n  wrench-factory-0-worker-2: done=293\n",
+      "stderr": ""
+    },
+    {
+      "turn": 17,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 240,
+      "stdout": "uptime_s          157\ngateway.admitted  1259   (per min, trailing 30 s: 479.3)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1259\nqueue.pending     2\nqueue.lag         90\njobs_done         1165   (per min, trailing 30 s: 599.6)\n  wrench-factory-0-worker-1: done=326\n  wrench-factory-0-worker-2: done=325\n",
+      "stderr": ""
+    },
+    {
+      "turn": 18,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 235,
+      "stdout": "uptime_s          165\ngateway.admitted  1326   (per min, trailing 30 s: 479.5)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1326\nqueue.pending     2\nqueue.lag         73\njobs_done         1249   (per min, trailing 30 s: 599.9)\n  wrench-factory-0-worker-1: done=368\n  wrench-factory-0-worker-2: done=367\n",
+      "stderr": ""
+    },
+    {
+      "turn": 19,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 260,
+      "stdout": "uptime_s          174\ngateway.admitted  1393   (per min, trailing 30 s: 478.3)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1394\nqueue.pending     2\nqueue.lag         57\njobs_done         1333   (per min, trailing 30 s: 598.3)\n  wrench-factory-0-worker-1: done=410\n  wrench-factory-0-worker-2: done=409\n",
+      "stderr": ""
+    },
+    {
+      "turn": 20,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 239,
+      "stdout": "uptime_s          182\ngateway.admitted  1461   (per min, trailing 30 s: 482.0)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1461\nqueue.pending     2\nqueue.lag         40\njobs_done         1417   (per min, trailing 30 s: 598.1)\n  wrench-factory-0-worker-1: done=452\n  wrench-factory-0-worker-2: done=451\n",
+      "stderr": ""
+    }
+  ],
+  "scores": {
+    "throughput_retained": {
+      "value": 0.9554242764705883,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "pooled_numerator": 917.0840000000001,
+        "pooled_denominator": 959.8709417221214,
+        "floor_adjusted_scoreable": false,
+        "floor_adjusted_num_fires": 0,
+        "floor_adjusted_pooled": null,
+        "floor_adjusted_pooled_numerator": 0.0,
+        "floor_adjusted_pooled_denominator": 0.0,
+        "fires": [
+          {
+            "kind": "belt_cut",
+            "tick": 61008,
+            "seed": 3,
+            "horizon_ticks": 120000,
+            "baseline_per_min": 479.9354708610607,
+            "actual": 917.0840000000001,
+            "expected": 959.8709417221214,
+            "tr": 0.9554242764705883,
+            "floor_actual": null,
+            "floor_expected": null,
+            "floor_tr": null
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "value": 1.0,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "recovered": 1,
+        "scoreable_fires": 1,
+        "fires": [
+          {
+            "kind": "belt_cut",
+            "tick": 61008,
+            "seed": 3,
+            "budget_ticks": 120000,
+            "recovered": true
+          }
+        ]
+      }
+    },
+    "detection": {
+      "value": 1.0,
+      "metadata": {
+        "precision": 1.0,
+        "precision_strict": 1.0,
+        "recall": 1.0,
+        "latencies": [
+          24512
+        ],
+        "mean_latency_ticks": 24512.0,
+        "matched_reports": 1,
+        "matched_reports_strict": 1,
+        "num_reports": 1,
+        "matched_fires": 1,
+        "num_fires": 1
+      }
+    },
+    "time_to_recovery": {
+      "mean_ticks": 52992.0,
+      "fires": [
+        {
+          "kind": "belt_cut",
+          "tick": 61008,
+          "seed": 3,
+          "parts": {
+            "ticks": 52992.0,
+            "recovered": true,
+            "budget_ticks": 120000
+          }
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "throughput_retained": 0.9554242764705883,
+    "throughput_retained_raw": 0.9554242764705883,
+    "throughput_retained_floor_adj": null,
+    "tr_scoreable": true,
+    "tr_pooled_numerator": 917.0840000000001,
+    "tr_pooled_denominator": 959.8709417221214,
+    "recovery_rate": 1.0,
+    "recovery_scoreable_fires": 1,
+    "recovery_recovered": 1,
+    "time_to_recovery_ticks": 52992.0,
+    "detection_recall": 1.0,
+    "detection_precision_strict": 1.0,
+    "detection_precision": 1.0,
+    "detection_latency_ticks": 24512.0,
+    "num_fires": 1,
+    "num_reports": 1
+  }
+}
