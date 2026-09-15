@@ -112,6 +112,59 @@ CPU budget, so it costs a little wall time per job) and the spread went to
 zero at this n. The CV claim holds at the new default with margin.
 
 
+### silent_throttle (detection-difficulty kind, `runs/floor_20260914T231632_*`, `runs/jitter_STcpu_*`, `runs/st_status_*`)
+
+A fifth kind whose point is that detection is no longer free. chaos installs an
+`AFTER INSERT` trigger on `jobs_done` that reads a delay from a one-row control
+table and `pg_sleep`s on every committed row (`chaos/main.py::SILENT_THROTTLE_SQL`,
+default `delay_s=2.0`). Every commit now takes ~200 ms of CPU plus the 2 s
+sleep, so two workers commit ~1 job/s against the 8 job/s load and
+`jobs_done_per_min` collapses, while `pg_isready` (which never inserts) keeps
+postgres healthy, no service logs an error, and the gateway keeps admitting at
+the baseline rate. The only evidence is the throughput signal. The true
+component is `postgres` alone (`wrench_compose/manifest.py::silent_throttle_affected`);
+a report naming the obviously-slow `worker` is a precision miss.
+
+Floor and bracket (one episode per cell, `cputime` default, `delay_s=2.0`):
+
+| kind | agent | noop/blind TR | oracle TR | oracle recovered (TTR) | detection | floor (<= 0.2) |
+|---|---|---|---|---|---|---|
+| silent_throttle | noop | 0.112 | - | - | recall 0.0 | pass (88.8% loss) |
+| silent_throttle | restart_all | 0.105 | - | - | recall 0.0 | pass (a blind bounce does not clear it) |
+| silent_throttle | oracle | - | 1.000 | yes (30.5 s) | precision 1.0 / recall 1.0, latency 539 ms | - |
+
+The oracle recovers with one `wrenchctl exec postgres psql -c "UPDATE
+wrench_throttle SET delay_s = 0"` (a single-row UPDATE, no `ACCESS EXCLUSIVE`
+lock on `jobs_done`); the trigger stays installed but sleeps 0. `restart_all`
+stays failed because the trigger and control row live in the postgres container
+filesystem and survive `docker restart`.
+
+Jitter (3 no-op replays, `cputime` default):
+
+| kind | agent | n | baseline mean (jobs/min) | baseline SD | TR mean | TR SD | TR CV | fire tick mean (s) | fire tick SD (s) | errors |
+|---|---|---|---|---|---|---|---|---|---|---|
+| silent_throttle | noop | 3 | 481.3 | 0.58 | 0.1125 | 0.0007 | 0.0060 | 61.0 | 0.00 | 0 |
+
+Per run: TR 0.1120 / 0.1123 / 0.1133, fire at tick 61000 in all three. CV
+0.0060 clears the <= 0.05 bar (no CPU term post-fire: the rate is set by the
+2 s sleep per commit, like belt_cut's toxic latency).
+
+Detection-difficulty check (`status_only` fixture reads only `wrenchctl ps`,
+never `metrics`, and reports any service below its expected container count):
+
+| kind | status_only detection | why |
+|---|---|---|
+| silent_throttle | recall 0.0 | at the fire, ps shows gateway 1, redis 1, postgres 1, worker 2 — every box up; the agent files no report |
+| entity_destruction (seed 1) | recall 1.0, latency 648 ms | gateway is gone from ps, so the same agent reports it |
+
+The same ps-only agent that catches a container-removal kind is blind to
+silent_throttle. Its fire-time ps snapshot
+(`runs/st_status_silent/episode.json`) is all-`running`, and the post-connection
+factory logs across the whole fault are only `done=` progression with no error
+line (the sole `redis unavailable` lines are the workers' startup reconnect to
+`netproxy`, before the `connected to redis` line and long before the fire).
+
+
 ## Reading
 
 **Go.** Both kinds clear TR CV <= 0.05 with a no-op agent (entity_destruction

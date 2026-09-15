@@ -20,8 +20,8 @@ export WRENCH_COMPOSE_SLOTS=2               # concurrent episodes (default 1)
 Slot `k` uses the subnets `10.232.k.0/24` and `10.231.k.0/24`; rollouts beyond `WRENCH_COMPOSE_SLOTS` wait for a free slot.
 
 ### Datasets
-- **Primary dataset**: generated, one row per (fault kind, seed). Kinds: `entity_destruction`, `belt_cut`, `resource_exhaustion`, `adaptive_strike`. Seed 1 hits the single point of failure (`gateway-1`), seed 3 one of two workers.
-- **Split sizes**: `kinds x seeds` rows (default 4 x 1); train and eval are the same generated grid.
+- **Primary dataset**: generated, one row per (fault kind, seed). Kinds: `entity_destruction`, `belt_cut`, `resource_exhaustion`, `adaptive_strike`, `silent_throttle`. Seed 1 hits the single point of failure (`gateway-1`), seed 3 one of two workers; `silent_throttle` (a postgres commit throttle that no container-status glance reveals) ignores the seed.
+- **Split sizes**: `kinds x seeds` rows (default 5 x 1); train and eval are the same generated grid.
 
 ### Task
 - **Type**: multi-turn (default 30 turns, one shell command line per turn, at least 6 s apart)

@@ -409,8 +409,8 @@ def load_environment(
 
     Args:
         kinds: fault kind(s) -- a list or comma-separated string. Default:
-            all four (``entity_destruction``, ``belt_cut``,
-            ``resource_exhaustion``, ``adaptive_strike``).
+            all five (``entity_destruction``, ``belt_cut``,
+            ``resource_exhaustion``, ``adaptive_strike``, ``silent_throttle``).
         seeds: seed(s) per kind (rows = kinds x seeds); default ``1``.
         turns: turn budget per episode (default 30).
         turn_period_s: minimum seconds between two executed commands.

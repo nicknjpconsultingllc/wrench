@@ -1,0 +1,184 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240,
+    "name": "ref2_belt_cut_s1_slot0",
+    "kind": "belt_cut",
+    "seed": 1,
+    "agent": "noop",
+    "params": {},
+    "slot": 0,
+    "label": ""
+  },
+  "timing": {
+    "t_start": 1789278867.883965,
+    "factory_up_s": 2.3,
+    "admin_up_s": 0.7,
+    "fire_wall_s": 60.7,
+    "agent_on_fire_s": 0.0,
+    "teardown_s": 7.1,
+    "t_end": 1789279060.92759,
+    "wall_s": 193.0
+  },
+  "error": null,
+  "spec_id": 1,
+  "fired": {
+    "tick": 61000,
+    "event": "fired",
+    "kind": "belt_cut",
+    "seed": 1,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-1",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      },
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-2",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 2
+      },
+      {
+        "service": "netproxy",
+        "container": null,
+        "x": 80.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        }
+      },
+      {
+        "service": "redis",
+        "container": null,
+        "x": 20.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        }
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [],
+  "probe_status": {
+    "tick": 182977,
+    "samples": 366,
+    "jobs_done": 594,
+    "rejected": 0,
+    "pg_errors": 0
+  },
+  "scores": {
+    "fires": [
+      {
+        "kind": "belt_cut",
+        "fire_tick": 61000,
+        "affected": [
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-1",
+            "x": 40.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            },
+            "same_type_total": 2
+          },
+          {
+            "service": "worker",
+            "container": "wrench-factory-0-worker-2",
+            "x": 40.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            },
+            "same_type_total": 2
+          },
+          {
+            "service": "netproxy",
+            "container": null,
+            "x": 80.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            }
+          },
+          {
+            "service": "redis",
+            "container": null,
+            "x": 20.0,
+            "y": 0.0,
+            "via": "netproxy",
+            "toxic": "latency",
+            "toxic_attributes": {
+              "latency": 1000,
+              "jitter": 0
+            }
+          }
+        ],
+        "baseline_per_min": 481.0400866738895,
+        "tr": 0.11016763669610202,
+        "tr_raw": 0.11016763669610202,
+        "tr_floor_adj": null,
+        "actual_jobs": 105.99009900990097,
+        "expected_jobs": 962.080173347779,
+        "recovered": false,
+        "ttr_ms": 120000.0
+      }
+    ],
+    "detection": {
+      "latencies": [],
+      "precision": 1.0,
+      "precision_strict": 1.0,
+      "recall": 0.0
+    },
+    "n_samples": 366,
+    "n_reports": 0,
+    "not_applicable": [],
+    "failed": []
+  }
+}

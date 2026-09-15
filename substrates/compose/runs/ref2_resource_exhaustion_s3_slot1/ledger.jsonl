@@ -1,0 +1,2 @@
+{"tick":61004,"event":"armed","kind":"resource_exhaustion","seed":3,"affected":[],"detail":{"id":1,"rate_per_min":481.96786880874606}}
+{"tick":61004,"event":"fired","kind":"resource_exhaustion","seed":3,"affected":[{"service":"postgres","container":"wrench-factory-1-postgres-1","x":60.0,"y":0.0,"hog":"wrench-admin-1-pghog","hog_connections":16,"same_type_total":1}],"detail":{"id":1}}

@@ -232,7 +232,9 @@ def test_dataset_rows_are_kinds_times_seeds():
     assert {r["info"]["seed"] for r in ds} == {1, 3}
     with pytest.raises(ValueError):
         wce.build_dataset(kinds="not_a_kind")
-    assert len(wce.build_dataset()) == 4
+    from wrench_compose.kinds import KINDS
+
+    assert len(wce.build_dataset()) == len(KINDS)
 
 
 def test_load_environment_defaults():

@@ -27,8 +27,10 @@ stays gone until you rebuild it.
 Faults may be injected at any time and are never announced. They fall into
 these categories: a container is killed and removed; the network path
 between two services is degraded; a shared resource (database connection
-slots) is used up by a foreign client; or whichever component carries the
-most load is taken out. You are not told which category, or when.
+slots) is used up by a foreign client; whichever component carries the most
+load is taken out; or a service is silently slowed so it commits far below
+its rate while still appearing up in `ps` with clean logs. You are not told
+which category, or when.
 
 You have {turns} turns. Each turn you receive the pipeline's own view
 (`wrenchctl ps` and `wrenchctl metrics`) together with the result of your

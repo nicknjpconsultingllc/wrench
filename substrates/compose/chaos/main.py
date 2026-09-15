@@ -27,7 +27,7 @@ import redis
 
 from wrench_compose.allowlist import COMPOSE_PROJECT_LABEL, is_agent_visible, service_of
 from wrench_compose.httpjson import HttpError, get, post, serve
-from wrench_compose.manifest import belt_cut_affected, service_entry
+from wrench_compose.manifest import belt_cut_affected, service_entry, silent_throttle_affected
 from wrench_compose.pick import load_bearing, pick_adaptive, pick_seeded
 
 FACTORY_PROJECT = os.environ["FACTORY_PROJECT"]
@@ -295,11 +295,51 @@ def fire_adaptive_strike(seed: int, params: dict):
     return [entry], None, False
 
 
+# Installed on the factory postgres by silent_throttle. An AFTER INSERT trigger
+# on jobs_done reads a delay from a one-row control table and pg_sleeps on every
+# committed job, so throughput collapses while every container stays up, no log
+# line is printed, and pg_isready (which never inserts) keeps postgres healthy.
+# The delay lives in a table row, not the trigger body, so the oracle clears it
+# with a single-row UPDATE that takes no ACCESS EXCLUSIVE lock on jobs_done.
+SILENT_THROTTLE_SQL = """
+CREATE TABLE IF NOT EXISTS wrench_throttle (id int PRIMARY KEY, delay_s double precision NOT NULL);
+INSERT INTO wrench_throttle (id, delay_s) VALUES (1, {delay})
+  ON CONFLICT (id) DO UPDATE SET delay_s = EXCLUDED.delay_s;
+CREATE OR REPLACE FUNCTION wrench_throttle_fn() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER AS $BODY$
+DECLARE d double precision;
+BEGIN
+  SELECT delay_s INTO d FROM wrench_throttle WHERE id = 1;
+  IF d IS NOT NULL AND d > 0 THEN PERFORM pg_sleep(d); END IF;
+  RETURN NULL;
+END;
+$BODY$;
+DROP TRIGGER IF EXISTS wrench_throttle_trg ON jobs_done;
+CREATE TRIGGER wrench_throttle_trg AFTER INSERT ON jobs_done
+  FOR EACH ROW EXECUTE FUNCTION wrench_throttle_fn();
+"""
+
+
+def fire_silent_throttle(seed: int, params: dict):
+    pgs = running("postgres")
+    if not pgs:
+        return None, "postgres not running", True
+    delay_s = float(params.get("delay_s", 2.0))
+    sql = SILENT_THROTTLE_SQL.format(delay=delay_s)
+    res = pgs[0].exec_run(["psql", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", "factory", "-qc", sql])
+    if res.exit_code != 0:
+        return None, f"could not install the commit trigger: {res.output[:200]!r}", False
+    # Nothing is destroyed; same_type_total is informational (postgres is not a
+    # redundancy kind), like resource_exhaustion.
+    return silent_throttle_affected(pgs[0].name, delay_s, len(pgs)), None, False
+
+
 KINDS = {
     "entity_destruction": fire_entity_destruction,
     "belt_cut": fire_belt_cut,
     "resource_exhaustion": fire_resource_exhaustion,
     "adaptive_strike": fire_adaptive_strike,
+    "silent_throttle": fire_silent_throttle,
 }
 
 

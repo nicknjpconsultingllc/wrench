@@ -38,7 +38,7 @@ only when the stamp verifies. Nothing inside the factory can mint throughput
 ```bash
 make venv            # uv venv + pip install -e .[dev] -e ./wrenchctl
 make build           # wrench-svc:local (all admin/factory Python services) + wrench-agent:local (the sandbox)
-make test            # 117 unit tests, no Docker (inspect-ai + verifiers installed by make venv)
+make test            # 130 unit tests, no Docker (inspect-ai + verifiers installed by make venv)
 make test-partition  # 9 anti-gaming checks from inside the sandbox, ~1 min with Docker
 make test-live       # every compose_live test: partition + bracketing + 4 no-op floor cells, ~25 min
 make demo            # no-op vs oracle on entity_destruction, ~8 min
@@ -91,6 +91,7 @@ shows why cputime replaced it (no-op TR CV 0.045 -> 0.003).
 | `belt_cut` | Toxiproxy `latency` 1000 ms (or `timeout`) toxic on the worker->redis proxy `netproxy` | chaos -> Toxiproxy API | `config worker REDIS_URL=redis://redis:6379/0` (re-route around the cut) | toxic lives in Toxiproxy, an admin container the agent cannot restart |
 | `resource_exhaustion` | admin `pghog` container greedily holds every free Postgres slot as role `analytics` (max_connections=20) and re-grabs after a restart | chaos runs the hog container | `exec postgres psql -c "ALTER ROLE analytics CONNECTION LIMIT 0; SELECT pg_terminate_backend(...)"` | hog reconnects faster than the workers after every Postgres restart |
 | `adaptive_strike` | probe measures 10 s flow-through per holder (every committed job traversed `gateway` and `redis`; each worker its own rows); chaos scores `flow share / replica count` (the capacity the loss removes: a SPOF scores 1.0, one of two workers ~0.25), kills the top holder, ties by seed. Postgres is excluded (stateful). | chaos | `scale <service> 1` | container is gone |
+| `silent_throttle` (compose-only) | chaos installs an `AFTER INSERT` trigger on `jobs_done` that reads a delay from a one-row control table and `pg_sleep`s on every commit (default 2 s); throughput collapses to ~1 job/s while every container stays up and healthy in `ps`, no log names it, and the gateway keeps admitting. The true component is `postgres` alone. | chaos runs `psql` as superuser | `exec postgres psql -c "UPDATE wrench_throttle SET delay_s = 0"` (a single-row UPDATE, no table lock) | the trigger and control row live in the postgres filesystem and survive `docker restart` |
 
 On the default topology `adaptive_strike` therefore kills `gateway` or `redis`
 (seed breaks the tie). The first version ranked holders by in-flight work
@@ -104,9 +105,17 @@ radius, so services have fixed synthetic positions 20 units apart
 service's position, strict radius 3 matches only the right service. A
 `belt_cut` manifest lists the workers plus `netproxy` and `redis`
 (`wrench_compose/manifest.py`), so a report naming any of the three earns
-credit; the agent cannot tell which end of the hop is at fault.
+credit; the agent cannot tell which end of the hop is at fault. `silent_throttle`
+is the one kind where detection discriminates: it kills no container and logs
+nothing, so noticing it means reading `jobs_done_per_min` (not glancing at
+`ps`), and its manifest names `postgres` alone, so the obvious guess (the slow
+`worker`) is a precision miss. A `status_only` fixture that reads only `ps`
+scores recall 0 on it and recall 1 on every container-removal kind
+(`docs/jitter_study.md`).
 
-Seeds against the default 2-worker layout (candidates sorted:
+`silent_throttle` ignores the seed (the postgres commit trigger is the same
+either way), like `belt_cut` and `resource_exhaustion`. Seeds against the
+default 2-worker layout (candidates sorted:
 `gateway-1, worker-1, worker-2`): seed 3 picks `worker-1` (redundant,
 no-op TR ~0.6, `same_type_total=2`, used for bracketing and the jitter
 study); seed 1 picks `gateway-1` (single point of failure, used for the floor
@@ -149,7 +158,9 @@ kind, seed, ledger vocabulary, HMAC or an admin service name.
 
 Fixture agents (`wrench_compose/agents.py`): `noop`, `restart_all` (restarts
 every factory service every 15 s from the fire), `oracle` (reads the fired
-manifest and applies the repair in the table above). All three act through
+manifest and applies the repair in the table above), and `status_only` (a
+detection probe that reads only `ps` and reports any service missing a
+container; blind to `silent_throttle`, which kills none). All act through
 `Wrenchctl`, i.e. `docker exec wrench-factory-<slot>-agent-1 wrenchctl --json ...`,
 never through an admin path, so a passing bracket proves the sandbox's
 surface is sufficient to recover from every kind.
@@ -338,9 +349,12 @@ worker kill give TR 0.6224 in all three (CV 0.0000, 600 post-fire jobs each),
 baseline 482.0 jobs/min, fire at 61.0 s. The oracle acting only through the
 sandbox's `wrenchctl` recovers every kind: TR 0.985 / 0.996 / 0.996 / 0.987
 (entity_destruction, belt_cut, resource_exhaustion, adaptive_strike),
-detection precision 1.0 / recall 1.0, latency 564-818 ms. Floor and
-bracketing tables for all four kinds are in the same file, with the raw runs
-under `runs/`.
+detection precision 1.0 / recall 1.0, latency 564-818 ms. The fifth kind,
+`silent_throttle`, holds the same shape: no-op TR 0.112 and `restart_all`
+0.105 (an 89% loss a blind bounce cannot clear), oracle 1.000 recovered at
+30.5 s, no-op TR CV 0.0060 over 3 replays, and a `status_only` agent scoring
+detection recall 0 on it against 1 on a container kill. Floor and bracketing
+tables for all five kinds are in the same file, with the raw runs under `runs/`.
 
 LLM path (`make test-driver`, `make table-smoke`, seed 3 = worker-1
 victim): `mockllm/model` through the Inspect task, 5 turns, scores exactly
@@ -353,3 +367,33 @@ through the same task rebuilds the worker 10.2 s after the fire
 `entity_destruction,belt_cut` x seed 3 on two slots finishes in 3.5 min
 with no error rows: TR 0.625 (floor-adj 0.250) and 0.110, both censored in
 the Kaplan-Meier pool.
+
+### First model grid (2026-09-12, `table_runs/20260912T231541`)
+
+3 models x 4 kinds x 2 seeds, two slots, 24/24 episodes, $7.44. The
+Factorio container of another project was stopped first, and a 2-slot no-op
+reference matched the serial floor (0.625 vs 0.622) so the paid run's host
+conditions were the measured ones.
+
+| kind | Sonnet 5 | GPT-5.1 | Gemini 2.5 Pro |
+|---|---|---|---|
+| entity_destruction | 0.965 | 0.946 | 0.911 |
+| belt_cut | 0.739 | 1.000 | 0.795 |
+| resource_exhaustion | 0.635 | 0.130 | 0.072 |
+| adaptive_strike | 0.940 | 0.849 | 0.842 |
+
+Detection recall was 1.0 for every model on every kind in this grid (the four
+container-status kinds): the `metrics` and `ps` view makes those faults
+obvious, so detection did not discriminate at that difficulty. The
+`silent_throttle` kind added afterward is the fix: it kills no container and
+logs nothing, so a `status_only` agent that reads only `ps` scores recall 0 on
+it (vs recall 1 on every kill kind), and noticing it means reading the
+throughput signal (`docs/jitter_study.md`). It is not in this grid's numbers.
+Recovery does discriminate, and
+`resource_exhaustion` is the hardest cell: it needs both freeing the held
+Postgres slots and reconnecting the workers, and only Sonnet did both on
+both seeds. `belt_cut` recovery requires the one `REDIS_URL` reroute; a
+plain `scale` or `restart` leaves the new connections on the degraded proxy
+and scores 0 (verified live), so that column measures whether the agent
+finds the reroute, not resilience to a fault it cannot dodge. See the
+project [writeup](../../docs/writeup.md).

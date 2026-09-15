@@ -25,3 +25,24 @@ def belt_cut_affected(worker_entries: list[dict], toxic: dict) -> list[dict]:
         service_entry(svc, via="netproxy", toxic=toxic["type"], toxic_attributes=toxic["attributes"])
         for svc in BELT_CUT_PATH
     ]
+
+
+# A silent_throttle installs an AFTER INSERT trigger on `jobs_done` that sleeps
+# on every commit, so the fault lives entirely inside `postgres`. Unlike
+# belt_cut there is no ambiguous hop: the workers are victims, not the cause,
+# so only `postgres` is in the manifest and a report naming the (obviously
+# slow) worker is a precision miss. Nothing is destroyed, so `same_type_total`
+# is informational and the kind stays out of ``redundancy_kinds``.
+SILENT_THROTTLE_SERVICE = "postgres"
+
+
+def silent_throttle_affected(container: str | None, delay_s: float, same_type_total: int) -> list[dict]:
+    return [
+        service_entry(
+            SILENT_THROTTLE_SERVICE,
+            container,
+            mechanism="commit_trigger_delay",
+            delay_s=delay_s,
+            same_type_total=same_type_total,
+        )
+    ]

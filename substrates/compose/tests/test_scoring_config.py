@@ -38,7 +38,7 @@ def test_single_point_of_failure_floor_is_plain_tr():
     assert adj == pytest.approx(plain)
 
 
-@pytest.mark.parametrize("kind", ["belt_cut", "resource_exhaustion"])
+@pytest.mark.parametrize("kind", ["belt_cut", "resource_exhaustion", "silent_throttle"])
 def test_non_kill_kinds_have_no_floor(kind):
     adj, plain = floor_adj(kind)
     assert adj is None and plain == pytest.approx(0.5, abs=0.02)

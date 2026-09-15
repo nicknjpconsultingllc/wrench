@@ -7,7 +7,7 @@ failure, the floor case). The fixture CLI, the Inspect task and the
 verifiers environment all read this module so the kind list cannot drift.
 """
 
-KINDS = ["entity_destruction", "belt_cut", "resource_exhaustion", "adaptive_strike"]
+KINDS = ["entity_destruction", "belt_cut", "resource_exhaustion", "adaptive_strike", "silent_throttle"]
 SEED_WORKER = 3
 SEED_GATEWAY = 1
 DEFAULT_SEED = SEED_GATEWAY
@@ -23,6 +23,12 @@ def parse_kinds(kinds) -> list[str]:
     if unknown:
         raise ValueError(f"unknown compose fault kind(s) {unknown}; choose from {KINDS}")
     return list(kinds)
+
+
+# Kinds that leave every container up and healthy in `ps` and print no error
+# line in any `logs`: the only evidence is the throughput signal. Recorded here
+# so a status-only detector and its tests agree on which kinds it is blind to.
+STEALTH_KINDS = frozenset({"silent_throttle"})
 
 
 def parse_seeds(seeds) -> list[int]:

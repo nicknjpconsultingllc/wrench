@@ -73,7 +73,13 @@ def cmd_jitter(a):
 
 def cmd_floor(a):
     stamp = time.strftime("%Y%m%dT%H%M%S")
-    seeds = {"entity_destruction": SEED_GATEWAY, "belt_cut": 1, "resource_exhaustion": 1, "adaptive_strike": 1}
+    seeds = {
+        "entity_destruction": SEED_GATEWAY,
+        "belt_cut": 1,
+        "resource_exhaustion": 1,
+        "adaptive_strike": 1,
+        "silent_throttle": 1,
+    }
     rs = []
     for kind in a.kinds:
         for ag in a.agents:
@@ -159,7 +165,7 @@ def main(argv=None):
     r.add_argument("--name", required=True)
     r.add_argument("--kind", choices=KINDS, required=True)
     r.add_argument("--seed", type=int, default=1)
-    r.add_argument("--agent", choices=["noop", "restart_all", "oracle"], default="noop")
+    r.add_argument("--agent", choices=["noop", "restart_all", "oracle", "status_only"], default="noop")
     r.add_argument("--params", default="{}")
     r.add_argument("--window-ms", type=int, default=120000)
     r.add_argument("--workers", type=int, default=2)

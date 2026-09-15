@@ -1,5 +1,6 @@
 """The agent surface as the sandbox sees it (`wrenchctl` run inside the agent
-container) and the scripted fixture agents: noop, restart_all, oracle.
+container) and the scripted fixture agents: noop, restart_all, oracle,
+status_only.
 
 Fixtures never touch an admin path: every action is `docker exec <sandbox>
 wrenchctl --json ...`, so a passing bracket proves the agent-visible surface
@@ -155,6 +156,51 @@ class Oracle(Agent):
                     ),
                 ],
             )
+        elif kind == "silent_throttle":
+            self._act(
+                "report_fault",
+                self.client.report_fault,
+                "postgres",
+                "commit trigger sleeps on every insert to jobs_done",
+            )
+            # Clear the delay with a single-row UPDATE (no ACCESS EXCLUSIVE lock
+            # on jobs_done, so it does not queue behind in-flight inserts).
+            self._act(
+                "exec",
+                self.client.exec,
+                "postgres",
+                ["psql", "-U", "postgres", "-d", "factory", "-c", "UPDATE wrench_throttle SET delay_s = 0"],
+            )
 
 
-AGENTS = {"noop": Noop, "restart_all": RestartAll, "oracle": Oracle}
+class StatusOnly(Agent):
+    """Detection probe, not a repairer: reads only ``wrenchctl ps`` once at the
+    fire and reports any service whose running-container count is below what the
+    topology expects. It never reads ``metrics`` and never touches throughput.
+
+    A container-removal kind (entity_destruction, adaptive_strike) makes a box
+    vanish from ``ps`` and is caught; silent_throttle leaves every box up, so
+    this agent files no report (detection recall 0). That gap is the point of
+    the kind: noticing it requires reading the throughput signal, not glancing
+    at container status."""
+
+    name = "status_only"
+
+    def on_fire(self, fired: dict) -> None:
+        expected = {"gateway": 1, "redis": 1, "postgres": 1, "worker": int(self.cfg.get("workers", 2))}
+        ps = self._act("ps", self.client.ps) or []
+        running: dict[str, int] = {}
+        for c in ps:
+            if isinstance(c, dict) and c.get("state") == "running":
+                svc = c.get("service")
+                running[svc] = running.get(svc, 0) + 1
+        # Record the fire-time snapshot so a caller can see what ps looked like
+        # during the fault (every box up under silent_throttle).
+        self.actions.append({"action": "ps_snapshot", "ps": ps, "running_by_service": running})
+        for svc, want in expected.items():
+            have = running.get(svc, 0)
+            if have < want:
+                self._act("report_fault", self.client.report_fault, svc, f"{svc}: {have}/{want} containers running")
+
+
+AGENTS = {"noop": Noop, "restart_all": RestartAll, "oracle": Oracle, "status_only": StatusOnly}

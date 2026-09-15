@@ -30,6 +30,7 @@ FORBIDDEN = [
     "belt_cut",
     "resource_exhaustion",
     "adaptive_strike",
+    "silent_throttle",
     "strike",
     "toxic",
     # how throughput is verified

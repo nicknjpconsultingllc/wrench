@@ -1,0 +1,102 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240,
+    "name": "jitter_STcpu_silent_throttle_noop_00",
+    "kind": "silent_throttle",
+    "seed": 1,
+    "agent": "noop",
+    "params": {},
+    "slot": 0,
+    "label": ""
+  },
+  "timing": {
+    "t_start": 1789453988.5292659,
+    "factory_up_s": 2.3,
+    "admin_up_s": 1.2,
+    "fire_wall_s": 60.5,
+    "agent_on_fire_s": 0.0,
+    "teardown_s": 7.1,
+    "t_end": 1789454181.866069,
+    "wall_s": 193.3
+  },
+  "error": null,
+  "spec_id": 1,
+  "fired": {
+    "tick": 61000,
+    "event": "fired",
+    "kind": "silent_throttle",
+    "seed": 1,
+    "affected": [
+      {
+        "service": "postgres",
+        "container": "wrench-factory-0-postgres-1",
+        "x": 60.0,
+        "y": 0.0,
+        "mechanism": "commit_trigger_delay",
+        "delay_s": 2.0,
+        "same_type_total": 1
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [],
+  "probe_status": {
+    "tick": 183420,
+    "samples": 367,
+    "jobs_done": 598,
+    "rejected": 0,
+    "pg_errors": 0
+  },
+  "scores": {
+    "fires": [
+      {
+        "kind": "silent_throttle",
+        "fire_tick": 61000,
+        "affected": [
+          {
+            "service": "postgres",
+            "container": "wrench-factory-0-postgres-1",
+            "x": 60.0,
+            "y": 0.0,
+            "mechanism": "commit_trigger_delay",
+            "delay_s": 2.0,
+            "same_type_total": 1
+          }
+        ],
+        "baseline_per_min": 482.0,
+        "tr": 0.11203319502074689,
+        "tr_raw": 0.11203319502074689,
+        "tr_floor_adj": null,
+        "actual_jobs": 108.0,
+        "expected_jobs": 964.0,
+        "recovered": false,
+        "ttr_ms": 120000.0
+      }
+    ],
+    "detection": {
+      "latencies": [],
+      "precision": 1.0,
+      "precision_strict": 1.0,
+      "recall": 0.0
+    },
+    "n_samples": 367,
+    "n_reports": 0,
+    "not_applicable": [],
+    "failed": []
+  }
+}

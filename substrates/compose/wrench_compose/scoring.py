@@ -6,9 +6,10 @@ defaults (60 ticks/s) are rebased: a 1-minute baseline window and a
 ``adaptive_strike`` manifests carry ``same_type_total`` with Factorio's
 meaning (chaos counts the victim service's running replicas at fire time,
 before the kill: ``len(running(service))`` in ``chaos/main.py``), so the
-redundancy floor applies to both kill kinds. ``belt_cut`` and
-``resource_exhaustion`` also write the field, but nothing is destroyed
-there, so it is informational and they stay out of ``redundancy_kinds``.
+redundancy floor applies to both kill kinds. ``belt_cut``,
+``resource_exhaustion`` and ``silent_throttle`` also write the field, but
+nothing is destroyed there, so it is informational and they stay out of
+``redundancy_kinds`` (floor-adjusted TR stays ``None``).
 Reports and fires carry x/y positions (``wrench_compose.positions``), so
 the default position matcher is kept.
 """

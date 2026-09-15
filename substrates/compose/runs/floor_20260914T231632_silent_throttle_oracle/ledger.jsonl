@@ -1,0 +1,4 @@
+{"tick":61000,"event":"armed","kind":"silent_throttle","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":480.0}}
+{"tick":61000,"event":"fired","kind":"silent_throttle","seed":1,"affected":[{"service":"postgres","container":"wrench-factory-0-postgres-1","x":60.0,"y":0.0,"mechanism":"commit_trigger_delay","delay_s":2.0,"same_type_total":1}],"detail":{"id":1}}
+{"tick":61539,"event":"report_fault","affected":[{"service":"postgres","x":60.0,"y":0.0}],"detail":{"service":"postgres","cause":"commit trigger sleeps on every insert to jobs_done","x":60.0,"y":0.0}}
+{"tick":61823,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"postgres","cmd":["psql","-U","postgres","-d","factory","-c","UPDATE wrench_throttle SET delay_s = 0"],"exit_code":0}}
