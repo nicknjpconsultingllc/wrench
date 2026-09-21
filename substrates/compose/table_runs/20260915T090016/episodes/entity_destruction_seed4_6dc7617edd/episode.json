@@ -1,0 +1,329 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240.0,
+    "name": "entity_destruction_seed4_6dc7617edd",
+    "kind": "entity_destruction",
+    "seed": 4,
+    "agent": "llm",
+    "params": {},
+    "slot": 0
+  },
+  "timing": {
+    "factory_up_s": 2.3,
+    "admin_up_s": 1.3,
+    "teardown_s": 7.4,
+    "t_start": 1789490604.3671591,
+    "probe_status": {
+      "tick": 185579,
+      "samples": 372,
+      "jobs_done": 1484,
+      "rejected": 0,
+      "pg_errors": 0
+    },
+    "t_end": 1789490800.4178119,
+    "wall_s": 196.1
+  },
+  "error": null,
+  "fired": {
+    "tick": 61001,
+    "event": "fired",
+    "kind": "entity_destruction",
+    "seed": 4,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-0-worker-2",
+        "x": 40.0,
+        "y": 0.0,
+        "same_type_total": 2
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "turn": 0,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 249,
+      "stdout": "uptime_s          11\ngateway.admitted  94   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      94\nqueue.pending     2\nqueue.lag         0\njobs_done         92   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=46\n  wrench-factory-0-worker-2: done=46\n",
+      "stderr": ""
+    },
+    {
+      "turn": 1,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 261,
+      "stdout": "uptime_s          19\ngateway.admitted  160   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      161\nqueue.pending     2\nqueue.lag         0\njobs_done         159   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=80\n  wrench-factory-0-worker-2: done=79\n",
+      "stderr": ""
+    },
+    {
+      "turn": 2,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 298,
+      "stdout": "uptime_s          30\ngateway.admitted  243   (per min, trailing 30 s: 479.6)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      243\nqueue.pending     1\nqueue.lag         0\njobs_done         242   (per min, trailing 30 s: 481.6)\n  wrench-factory-0-worker-1: done=121\n  wrench-factory-0-worker-2: done=121\n",
+      "stderr": ""
+    },
+    {
+      "turn": 3,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 277,
+      "stdout": "uptime_s          38\ngateway.admitted  309   (per min, trailing 30 s: 478.9)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      310\nqueue.pending     2\nqueue.lag         0\njobs_done         308   (per min, trailing 30 s: 480.9)\n  wrench-factory-0-worker-1: done=154\n  wrench-factory-0-worker-2: done=154\n",
+      "stderr": ""
+    },
+    {
+      "turn": 4,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 278,
+      "stdout": "uptime_s          45\ngateway.admitted  368   (per min, trailing 30 s: 480.7)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      368\nqueue.pending     2\nqueue.lag         0\njobs_done         366   (per min, trailing 30 s: 478.7)\n  wrench-factory-0-worker-1: done=183\n  wrench-factory-0-worker-2: done=183\n",
+      "stderr": ""
+    },
+    {
+      "turn": 5,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 256,
+      "stdout": "uptime_s          53\ngateway.admitted  426   (per min, trailing 30 s: 480.8)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      426\nqueue.pending     2\nqueue.lag         0\njobs_done         424   (per min, trailing 30 s: 478.8)\n  wrench-factory-0-worker-1: done=212\n  wrench-factory-0-worker-2: done=212\n",
+      "stderr": ""
+    },
+    {
+      "turn": 6,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 223,
+      "stdout": "uptime_s          61\ngateway.admitted  492   (per min, trailing 30 s: 480.9)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      492\nqueue.pending     2\nqueue.lag         0\njobs_done         487   (per min, trailing 30 s: 472.9)\n  wrench-factory-0-worker-1: done=246\n",
+      "stderr": ""
+    },
+    {
+      "turn": 7,
+      "command": "wrenchctl report_fault worker 'one worker container is gone'",
+      "exit_code": 0,
+      "ms": 228,
+      "stdout": "recorded (t=72476 ms)\n",
+      "stderr": ""
+    },
+    {
+      "turn": 8,
+      "command": "wrenchctl scale worker 2",
+      "exit_code": 0,
+      "ms": 348,
+      "stdout": "running: wrench-factory-0-worker-1, wrench-factory-0-worker-2\ncreated: wrench-factory-0-worker-2\n",
+      "stderr": ""
+    },
+    {
+      "turn": 9,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 282,
+      "stdout": "uptime_s          86\ngateway.admitted  690   (per min, trailing 30 s: 479.8)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      691\nqueue.pending     2\nqueue.lag         47\njobs_done         639   (per min, trailing 30 s: 383.1)\n  wrench-factory-0-worker-1: done=370\n  wrench-factory-0-worker-2: done=28\n",
+      "stderr": ""
+    },
+    {
+      "turn": 10,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 292,
+      "stdout": "uptime_s          98\ngateway.admitted  791   (per min, trailing 30 s: 478.7)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      792\nqueue.pending     2\nqueue.lag         22\njobs_done         765   (per min, trailing 30 s: 480.7)\n  wrench-factory-0-worker-1: done=433\n  wrench-factory-0-worker-2: done=91\n",
+      "stderr": ""
+    },
+    {
+      "turn": 11,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 296,
+      "stdout": "uptime_s          106\ngateway.admitted  850   (per min, trailing 30 s: 480.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      850\nqueue.pending     2\nqueue.lag         6\njobs_done         838   (per min, trailing 30 s: 551.6)\n  wrench-factory-0-worker-1: done=469\n  wrench-factory-0-worker-2: done=128\n",
+      "stderr": ""
+    },
+    {
+      "turn": 12,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 295,
+      "stdout": "uptime_s          115\ngateway.admitted  925   (per min, trailing 30 s: 479.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      925\nqueue.pending     1\nqueue.lag         0\njobs_done         921   (per min, trailing 30 s: 578.1)\n  wrench-factory-0-worker-1: done=511\n  wrench-factory-0-worker-2: done=169\n",
+      "stderr": ""
+    },
+    {
+      "turn": 13,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 271,
+      "stdout": "uptime_s          124\ngateway.admitted  1000   (per min, trailing 30 s: 481.9)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1000\nqueue.pending     2\nqueue.lag         0\njobs_done         995   (per min, trailing 30 s: 539.4)\n  wrench-factory-0-worker-1: done=548\n  wrench-factory-0-worker-2: done=206\n",
+      "stderr": ""
+    },
+    {
+      "turn": 14,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 285,
+      "stdout": "uptime_s          134\ngateway.admitted  1074   (per min, trailing 30 s: 479.6)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1075\nqueue.pending     2\nqueue.lag         0\njobs_done         1070   (per min, trailing 30 s: 503.4)\n  wrench-factory-0-worker-1: done=585\n  wrench-factory-0-worker-2: done=244\n",
+      "stderr": ""
+    },
+    {
+      "turn": 15,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 235,
+      "stdout": "uptime_s          141\ngateway.admitted  1133   (per min, trailing 30 s: 480.5)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1133\nqueue.pending     2\nqueue.lag         0\njobs_done         1128   (per min, trailing 30 s: 478.5)\n  wrench-factory-0-worker-1: done=614\n  wrench-factory-0-worker-2: done=273\n",
+      "stderr": ""
+    },
+    {
+      "turn": 16,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 234,
+      "stdout": "uptime_s          150\ngateway.admitted  1207   (per min, trailing 30 s: 478.7)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1208\nqueue.pending     2\nqueue.lag         0\njobs_done         1203   (per min, trailing 30 s: 480.7)\n  wrench-factory-0-worker-1: done=652\n  wrench-factory-0-worker-2: done=310\n",
+      "stderr": ""
+    },
+    {
+      "turn": 17,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 288,
+      "stdout": "uptime_s          160\ngateway.admitted  1282   (per min, trailing 30 s: 480.6)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1282\nqueue.pending     1\nqueue.lag         0\njobs_done         1278   (per min, trailing 30 s: 480.6)\n  wrench-factory-0-worker-1: done=689\n  wrench-factory-0-worker-2: done=348\n",
+      "stderr": ""
+    },
+    {
+      "turn": 18,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 264,
+      "stdout": "uptime_s          169\ngateway.admitted  1356   (per min, trailing 30 s: 479.2)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1357\nqueue.pending     2\nqueue.lag         0\njobs_done         1352   (per min, trailing 30 s: 479.2)\n  wrench-factory-0-worker-1: done=726\n  wrench-factory-0-worker-2: done=385\n",
+      "stderr": ""
+    },
+    {
+      "turn": 19,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 207,
+      "stdout": "uptime_s          176\ngateway.admitted  1415   (per min, trailing 30 s: 480.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1415\nqueue.pending     1\nqueue.lag         0\njobs_done         1410   (per min, trailing 30 s: 478.4)\n  wrench-factory-0-worker-1: done=755\n  wrench-factory-0-worker-2: done=414\n",
+      "stderr": ""
+    },
+    {
+      "turn": 20,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 243,
+      "stdout": "uptime_s          183\ngateway.admitted  1473   (per min, trailing 30 s: 480.2)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1473\nqueue.pending     1\nqueue.lag         0\njobs_done         1469   (per min, trailing 30 s: 480.2)\n  wrench-factory-0-worker-1: done=785\n  wrench-factory-0-worker-2: done=443\n",
+      "stderr": ""
+    }
+  ],
+  "scores": {
+    "throughput_retained": {
+      "value": 1.0000168067226891,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "pooled_numerator": 960.0,
+        "pooled_denominator": 959.9838658173812,
+        "floor_adjusted_scoreable": true,
+        "floor_adjusted_num_fires": 1,
+        "floor_adjusted_pooled": 1.0000336134453782,
+        "floor_adjusted_pooled_numerator": 480.0080670913094,
+        "floor_adjusted_pooled_denominator": 479.9919329086906,
+        "fires": [
+          {
+            "kind": "entity_destruction",
+            "tick": 61001,
+            "seed": 4,
+            "horizon_ticks": 120000,
+            "baseline_per_min": 479.9919329086906,
+            "actual": 960.0,
+            "expected": 959.9838658173812,
+            "tr": 1.0000168067226891,
+            "floor_actual": 480.0080670913094,
+            "floor_expected": 479.9919329086906,
+            "floor_tr": 1.0000336134453782
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "value": 1.0,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "recovered": 1,
+        "scoreable_fires": 1,
+        "fires": [
+          {
+            "kind": "entity_destruction",
+            "tick": 61001,
+            "seed": 4,
+            "budget_ticks": 120000,
+            "recovered": true
+          }
+        ]
+      }
+    },
+    "detection": {
+      "value": 1.0,
+      "metadata": {
+        "precision": 1.0,
+        "precision_strict": 1.0,
+        "recall": 1.0,
+        "latencies": [
+          11475
+        ],
+        "mean_latency_ticks": 11475.0,
+        "matched_reports": 1,
+        "matched_reports_strict": 1,
+        "num_reports": 1,
+        "matched_fires": 1,
+        "num_fires": 1
+      }
+    },
+    "time_to_recovery": {
+      "mean_ticks": 32999.0,
+      "fires": [
+        {
+          "kind": "entity_destruction",
+          "tick": 61001,
+          "seed": 4,
+          "parts": {
+            "ticks": 32999.0,
+            "recovered": true,
+            "budget_ticks": 120000
+          }
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "throughput_retained": 1.0000168067226891,
+    "throughput_retained_raw": 1.0000168067226891,
+    "throughput_retained_floor_adj": 1.0000336134453782,
+    "tr_scoreable": true,
+    "tr_pooled_numerator": 960.0,
+    "tr_pooled_denominator": 959.9838658173812,
+    "recovery_rate": 1.0,
+    "recovery_scoreable_fires": 1,
+    "recovery_recovered": 1,
+    "time_to_recovery_ticks": 32999.0,
+    "detection_recall": 1.0,
+    "detection_precision_strict": 1.0,
+    "detection_precision": 1.0,
+    "detection_latency_ticks": 11475.0,
+    "num_fires": 1,
+    "num_reports": 1
+  }
+}

@@ -1,0 +1,7 @@
+{"tick":61000,"event":"armed","kind":"resource_exhaustion","seed":5,"affected":[],"detail":{"id":1,"rate_per_min":480.0}}
+{"tick":61000,"event":"fired","kind":"resource_exhaustion","seed":5,"affected":[{"service":"postgres","container":"wrench-factory-0-postgres-1","x":60.0,"y":0.0,"hog":"wrench-admin-0-pghog","hog_connections":16,"same_type_total":1}],"detail":{"id":1}}
+{"tick":100447,"event":"report_fault","affected":[{"service":"postgres","x":60.0,"y":0.0}],"detail":{"service":"postgres","cause":"connection slots exhausted by a foreign client","x":60.0,"y":0.0}}
+{"tick":106920,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}
+{"tick":142782,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":159379,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"worker","cmd":["ping","-c","3","10.232.0.4"],"exit_code":127}}
+{"tick":167394,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"worker","cmd":["nc","-zv","10.232.0.4","5432"],"exit_code":127}}

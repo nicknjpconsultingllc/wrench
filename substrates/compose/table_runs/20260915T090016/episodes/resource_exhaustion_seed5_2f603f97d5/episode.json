@@ -1,0 +1,355 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240.0,
+    "name": "resource_exhaustion_seed5_2f603f97d5",
+    "kind": "resource_exhaustion",
+    "seed": 5,
+    "agent": "llm",
+    "params": {},
+    "slot": 0
+  },
+  "timing": {
+    "factory_up_s": 2.3,
+    "admin_up_s": 1.2,
+    "teardown_s": 7.7,
+    "t_start": 1789492780.8553832,
+    "probe_status": {
+      "tick": 188887,
+      "samples": 378,
+      "jobs_done": 662,
+      "rejected": 0,
+      "pg_errors": 132
+    },
+    "t_end": 1789492980.357183,
+    "wall_s": 199.5
+  },
+  "error": null,
+  "fired": {
+    "tick": 61000,
+    "event": "fired",
+    "kind": "resource_exhaustion",
+    "seed": 5,
+    "affected": [
+      {
+        "service": "postgres",
+        "container": "wrench-factory-0-postgres-1",
+        "x": 60.0,
+        "y": 0.0,
+        "hog": "wrench-admin-0-pghog",
+        "hog_connections": 16,
+        "same_type_total": 1
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "turn": 0,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 282,
+      "stdout": "uptime_s          4\ngateway.admitted  35   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      35\nqueue.pending     1\nqueue.lag         0\njobs_done         34   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=17\n  wrench-factory-0-worker-2: done=17\n",
+      "stderr": ""
+    },
+    {
+      "turn": 1,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 221,
+      "stdout": "uptime_s          10\ngateway.admitted  85   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      85\nqueue.pending     1\nqueue.lag         0\njobs_done         84   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=42\n  wrench-factory-0-worker-2: done=42\n",
+      "stderr": ""
+    },
+    {
+      "turn": 2,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 257,
+      "stdout": "uptime_s          17\ngateway.admitted  143   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      143\nqueue.pending     1\nqueue.lag         0\njobs_done         142   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=71\n  wrench-factory-0-worker-2: done=71\n",
+      "stderr": ""
+    },
+    {
+      "turn": 3,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 222,
+      "stdout": "uptime_s          23\ngateway.admitted  193   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      193\nqueue.pending     2\nqueue.lag         0\njobs_done         191   (per min, trailing 30 s: -)\n  wrench-factory-0-worker-1: done=96\n  wrench-factory-0-worker-2: done=95\n",
+      "stderr": ""
+    },
+    {
+      "turn": 4,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 225,
+      "stdout": "uptime_s          31\ngateway.admitted  251   (per min, trailing 30 s: 480.5)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      251\nqueue.pending     2\nqueue.lag         0\njobs_done         249   (per min, trailing 30 s: 480.5)\n  wrench-factory-0-worker-1: done=125\n  wrench-factory-0-worker-2: done=124\n",
+      "stderr": ""
+    },
+    {
+      "turn": 5,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 222,
+      "stdout": "uptime_s          39\ngateway.admitted  317   (per min, trailing 30 s: 481.1)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      317\nqueue.pending     1\nqueue.lag         0\njobs_done         316   (per min, trailing 30 s: 481.1)\n  wrench-factory-0-worker-1: done=158\n  wrench-factory-0-worker-2: done=158\n",
+      "stderr": ""
+    },
+    {
+      "turn": 6,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 204,
+      "stdout": "uptime_s          45\ngateway.admitted  367   (per min, trailing 30 s: 480.0)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      368\nqueue.pending     2\nqueue.lag         0\njobs_done         366   (per min, trailing 30 s: 480.0)\n  wrench-factory-0-worker-1: done=183\n  wrench-factory-0-worker-2: done=183\n",
+      "stderr": ""
+    },
+    {
+      "turn": 7,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 282,
+      "stdout": "uptime_s          51\ngateway.admitted  417   (per min, trailing 30 s: 480.3)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      417\nqueue.pending     1\nqueue.lag         0\njobs_done         416   (per min, trailing 30 s: 480.3)\n  wrench-factory-0-worker-1: done=208\n  wrench-factory-0-worker-2: done=208\n",
+      "stderr": ""
+    },
+    {
+      "turn": 8,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 213,
+      "stdout": "uptime_s          58\ngateway.admitted  467   (per min, trailing 30 s: 480.5)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      467\nqueue.pending     2\nqueue.lag         0\njobs_done         465   (per min, trailing 30 s: 480.5)\n  wrench-factory-0-worker-1: done=233\n  wrench-factory-0-worker-2: done=232\n",
+      "stderr": ""
+    },
+    {
+      "turn": 9,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 287,
+      "stdout": "uptime_s          64\ngateway.admitted  516   (per min, trailing 30 s: 479.3)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      516\nqueue.pending     2\nqueue.lag         24\njobs_done         490   (per min, trailing 30 s: 431.4)\n  wrench-factory-0-worker-1: done=245\n  wrench-factory-0-worker-2: done=245\n",
+      "stderr": ""
+    },
+    {
+      "turn": 10,
+      "command": "wrenchctl logs worker --tail 40",
+      "exit_code": 0,
+      "ms": 244,
+      "stdout": "==> wrench-factory-0-worker-1 <==\nworker 237302cecfff redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\ndone=200\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\n==> wrench-factory-0-worker-2 <==\nworker 6987ce1d26e0 redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\ndone=200\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\n",
+      "stderr": ""
+    },
+    {
+      "turn": 11,
+      "command": "wrenchctl report_fault postgres 'workers repeatedly failing with FATAL connection errors to postgres (likely connection slots exhausted or DB unreachable)'",
+      "exit_code": 0,
+      "ms": 257,
+      "stdout": "recorded (t=79324 ms)\n",
+      "stderr": ""
+    },
+    {
+      "turn": 12,
+      "command": "wrenchctl restart postgres",
+      "exit_code": 0,
+      "ms": 427,
+      "stdout": "restarted: wrench-factory-0-postgres-1\n",
+      "stderr": ""
+    },
+    {
+      "turn": 13,
+      "command": "wrenchctl logs worker --tail 40",
+      "exit_code": 0,
+      "ms": 292,
+      "stdout": "==> wrench-factory-0-worker-1 <==\nworker 237302cecfff redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\ndone=200\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: Conne); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\n==> wrench-factory-0-worker-2 <==\nworker 6987ce1d26e0 redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\ndone=200\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); ret\n... [truncated 518 bytes]",
+      "stderr": ""
+    },
+    {
+      "turn": 14,
+      "command": "wrenchctl exec postgres -- psql -U postgres -d factory -c 'SELECT datname, state, usename, client_addr FROM pg_stat_activity'",
+      "exit_code": 0,
+      "ms": 329,
+      "stdout": " datname | state  |  usename  | client_addr \n---------+--------+-----------+-------------\n         |        |           | \n         |        | postgres  | \n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | idle   | analytics | 10.232.0.11\n factory | active | postgres  | \n         |        |           | \n         |        |           | \n         |        |           | \n(23 rows)\n\n",
+      "stderr": ""
+    },
+    {
+      "turn": 15,
+      "command": "wrenchctl exec postgres -- psql -U postgres -d factory -c \"SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename='analytics';\"",
+      "exit_code": 0,
+      "ms": 265,
+      "stdout": " pg_terminate_backend \n----------------------\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n t\n(17 rows)\n\n",
+      "stderr": ""
+    },
+    {
+      "turn": 16,
+      "command": "wrenchctl restart worker",
+      "exit_code": 0,
+      "ms": 10639,
+      "stdout": "restarted: wrench-factory-0-worker-1, wrench-factory-0-worker-2\n",
+      "stderr": ""
+    },
+    {
+      "turn": 17,
+      "command": "wrenchctl logs worker --tail 40",
+      "exit_code": 0,
+      "ms": 246,
+      "stdout": "==> wrench-factory-0-worker-1 <==\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: Conne); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\nworker 237302cecfff redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://netproxy:6379/0\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\n==> wrench-factory-0-worker-2 <==\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.0.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection \n... [truncated 4046 bytes]",
+      "stderr": ""
+    },
+    {
+      "turn": 18,
+      "command": "wrenchctl logs postgres --tail 80",
+      "exit_code": 0,
+      "ms": 288,
+      "stdout": "==> wrench-factory-0-postgres-1 <==\n2026-09-15 17:21:55.269 UTC [815] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:55.377 UTC [816] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:55.483 UTC [817] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:55.587 UTC [818] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:55.660 UTC [819] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:55.692 UTC [820] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:55.797 UTC [821] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:55.902 UTC [822] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.011 UTC [823] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.062 UTC [824] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.115 UTC [831] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.159 UTC [833] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.220 UTC [834] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.324 UTC [835] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.429 UTC [836] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.537 UTC [837] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.643 UTC [838] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.656 UTC [839] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.749 UTC [840] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.854 UTC [841] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:56.960 UTC [842] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.065 UTC [843] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.159 UTC [844] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.169 UTC [845] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.241 UTC [846] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.274 UTC [847] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.380 UTC [848] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.484 UTC [849] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.593 UTC [850] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.660 UTC [851] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.698 UTC [852] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.802 UTC [853] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:57.907 UTC [854] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.011 UTC [855] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.065 UTC [856] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.118 UTC [857] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.158 UTC [864] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.222 UTC [866] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.326 UTC [867] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.430 UTC [868] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.536 UTC [869] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.644 UTC [870] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.660 UTC [871] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.753 UTC [872] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.862 UTC [873] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:58.968 UTC [874] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:59.074 UTC [875] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:59.157 UTC [876] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:59.179 UTC [877] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 17:21:59.244 UTC [878] F\n... [truncated 3716 bytes]",
+      "stderr": ""
+    },
+    {
+      "turn": 19,
+      "command": "wrenchctl config edit postgres POSTGRES_MAX_CONNECTIONS=200",
+      "exit_code": 0,
+      "ms": 483,
+      "stdout": "recreated: wrench-factory-0-postgres-1\nenv:\n  DOCKER_PG_LLVM_DEPS=llvm21-dev \t\tclang21\n  GOSU_VERSION=1.19\n  LANG=en_US.utf8\n  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n  PGDATA=/var/lib/postgresql/data\n  PG_MAJOR=16\n  PG_SHA256=c1575341fa7bd40f5274ea465b34390f4dc64cdd0770af327005caaeb9f6b7ed\n  PG_VERSION=16.15\n  POSTGRES_DB=factory\n  POSTGRES_MAX_CONNECTIONS=200\n  POSTGRES_PASSWORD=factory\n",
+      "stderr": ""
+    },
+    {
+      "turn": 20,
+      "command": "wrenchctl restart worker",
+      "exit_code": 0,
+      "ms": 10615,
+      "stdout": "restarted: wrench-factory-0-worker-1, wrench-factory-0-worker-2\n",
+      "stderr": ""
+    },
+    {
+      "turn": 21,
+      "command": "wrenchctl scale worker 3",
+      "exit_code": 0,
+      "ms": 451,
+      "stdout": "running: wrench-factory-0-worker-1, wrench-factory-0-worker-2, wrench-factory-0-worker-3\ncreated: wrench-factory-0-worker-3\n",
+      "stderr": ""
+    },
+    {
+      "turn": 22,
+      "command": "wrenchctl scale worker 4",
+      "exit_code": 0,
+      "ms": 377,
+      "stdout": "running: wrench-factory-0-worker-1, wrench-factory-0-worker-2, wrench-factory-0-worker-3, wrench-factory-0-worker-4\ncreated: wrench-factory-0-worker-4\n",
+      "stderr": ""
+    },
+    {
+      "turn": 23,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 286,
+      "stdout": "uptime_s          187\ngateway.admitted  1501   (per min, trailing 30 s: 478.9)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1502\nqueue.pending     4\nqueue.lag         566\njobs_done         928   (per min, trailing 30 s: 778.0)\n  wrench-factory-0-worker-1: done=124\n  wrench-factory-0-worker-2: done=98\n  wrench-factory-0-worker-3: done=65\n  wrench-factory-0-worker-4: done=33\n",
+      "stderr": ""
+    }
+  ],
+  "scores": {
+    "throughput_retained": {
+      "value": 0.02494802494802495,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "pooled_numerator": 24.0,
+        "pooled_denominator": 962.0,
+        "floor_adjusted_scoreable": false,
+        "floor_adjusted_num_fires": 0,
+        "floor_adjusted_pooled": null,
+        "floor_adjusted_pooled_numerator": 0.0,
+        "floor_adjusted_pooled_denominator": 0.0,
+        "fires": [
+          {
+            "kind": "resource_exhaustion",
+            "tick": 61000,
+            "seed": 5,
+            "horizon_ticks": 120000,
+            "baseline_per_min": 481.0,
+            "actual": 24.0,
+            "expected": 962.0,
+            "tr": 0.02494802494802495,
+            "floor_actual": null,
+            "floor_expected": null,
+            "floor_tr": null
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "value": 0.0,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "recovered": 0,
+        "scoreable_fires": 1,
+        "fires": [
+          {
+            "kind": "resource_exhaustion",
+            "tick": 61000,
+            "seed": 5,
+            "budget_ticks": 120000,
+            "recovered": false
+          }
+        ]
+      }
+    },
+    "detection": {
+      "value": 1.0,
+      "metadata": {
+        "precision": 1.0,
+        "precision_strict": 1.0,
+        "recall": 1.0,
+        "latencies": [
+          18324
+        ],
+        "mean_latency_ticks": 18324.0,
+        "matched_reports": 1,
+        "matched_reports_strict": 1,
+        "num_reports": 1,
+        "matched_fires": 1,
+        "num_fires": 1
+      }
+    },
+    "time_to_recovery": {
+      "mean_ticks": 120000.0,
+      "fires": [
+        {
+          "kind": "resource_exhaustion",
+          "tick": 61000,
+          "seed": 5,
+          "parts": {
+            "ticks": 120000.0,
+            "recovered": false,
+            "budget_ticks": 120000
+          }
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "throughput_retained": 0.02494802494802495,
+    "throughput_retained_raw": 0.02494802494802495,
+    "throughput_retained_floor_adj": null,
+    "tr_scoreable": true,
+    "tr_pooled_numerator": 24.0,
+    "tr_pooled_denominator": 962.0,
+    "recovery_rate": 0.0,
+    "recovery_scoreable_fires": 1,
+    "recovery_recovered": 0,
+    "time_to_recovery_ticks": 120000.0,
+    "detection_recall": 1.0,
+    "detection_precision_strict": 1.0,
+    "detection_precision": 1.0,
+    "detection_latency_ticks": 18324.0,
+    "num_fires": 1,
+    "num_reports": 1
+  }
+}

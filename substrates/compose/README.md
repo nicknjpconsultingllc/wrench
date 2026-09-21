@@ -368,7 +368,27 @@ through the same task rebuilds the worker 10.2 s after the fire
 with no error rows: TR 0.625 (floor-adj 0.250) and 0.110, both censored in
 the Kaplan-Meier pool.
 
-### First model grid (2026-09-12, `table_runs/20260912T231541`)
+### Model grids
+
+**k=5 (2026-09-15, `table_runs/20260915T090016`)** is the result: 3 models x
+4 kinds x 5 seeds, 60/60 episodes, $17.66. Pooled TR with a bootstrap 95%
+interval over the five seeds per cell.
+
+| kind | Sonnet 5 | GPT-5.1 | Gemini 2.5 Pro |
+|---|---|---|---|
+| entity_destruction | 0.98 [0.95, 1.00] | 0.98 [0.94, 1.00] | 0.97 [0.91, 1.00] |
+| belt_cut | 0.60 [0.33, 0.87] | 0.94 [0.87, 1.00] | 0.39 [0.17, 0.61] |
+| resource_exhaustion | 0.74 [0.46, 0.96] | 0.08 [0.01, 0.15] | 0.00 [0.00, 0.00] |
+| adaptive_strike | 0.91 [0.90, 0.93] | 0.86 [0.85, 0.88] | 0.81 [0.75, 0.86] |
+
+resource_exhaustion is the clean separator (Sonnet recovers 4/5, the others
+0/10, non-overlapping intervals); belt_cut splits GPT-5.1 from Gemini;
+adaptive_strike is a tight ordering; entity_destruction saturates. Detection
+recall is 1.0 everywhere, precision falls below 1.0 on the harder kinds, which
+is why `silent_throttle` exists. Full reading in the project
+[writeup](../../docs/writeup.md).
+
+**k=2 pilot (2026-09-12, `table_runs/20260912T231541`)**
 
 3 models x 4 kinds x 2 seeds, two slots, 24/24 episodes, $7.44. The
 Factorio container of another project was stopped first, and a 2-slot no-op

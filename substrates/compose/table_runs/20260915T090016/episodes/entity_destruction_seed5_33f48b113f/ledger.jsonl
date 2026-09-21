@@ -1,0 +1,4 @@
+{"tick":61005,"event":"armed","kind":"entity_destruction","seed":5,"affected":[],"detail":{"id":1,"rate_per_min":481.9598366802766}}
+{"tick":61005,"event":"fired","kind":"entity_destruction","seed":5,"affected":[{"service":"worker","container":"wrench-factory-0-worker-2","x":40.0,"y":0.0,"same_type_total":2}],"detail":{"id":1}}
+{"tick":85356,"event":"report_fault","affected":[{"service":"worker","x":40.0,"y":0.0}],"detail":{"service":"worker","cause":"container wrench-factory-0-worker-2 is missing","x":40.0,"y":0.0}}
+{"tick":94206,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"worker","replicas":2,"created":["wrench-factory-0-worker-2"],"removed":[]}}

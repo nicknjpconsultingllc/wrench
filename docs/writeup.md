@@ -131,50 +131,60 @@ teaching the command wrapper to carry its stderr.
 
 ## First results
 
-Three models, four fault kinds, two seeds each, on the services substrate.
-Every episode completed. Total spend was $7.44.
+Three models, four fault kinds, five seeds each on the services substrate,
+sixty episodes, all completed, $17.66. A two-seed pilot ran first at $7.44 and
+set the design and the fixes below; the five-seed grid is the result. The table
+is pooled Throughput Retained with a bootstrap 95% interval over the five
+seeds in each cell.
 
 | kind | Claude Sonnet 5 | GPT-5.1 | Gemini 2.5 Pro |
 |---|---|---|---|
-| entity_destruction | 0.965 | 0.946 | 0.911 |
-| belt_cut | 0.739 | 1.000 | 0.795 |
-| resource_exhaustion | 0.635 | 0.130 | 0.072 |
-| adaptive_strike | 0.940 | 0.849 | 0.842 |
+| entity_destruction | 0.98 [0.95, 1.00] | 0.98 [0.94, 1.00] | 0.97 [0.91, 1.00] |
+| belt_cut | 0.60 [0.33, 0.87] | 0.94 [0.87, 1.00] | 0.39 [0.17, 0.61] |
+| resource_exhaustion | 0.74 [0.46, 0.96] | 0.08 [0.01, 0.15] | 0.00 [0.00, 0.00] |
+| adaptive_strike | 0.91 [0.90, 0.93] | 0.86 [0.85, 0.88] | 0.81 [0.75, 0.86] |
 
-Two readings, and one caveat that a review turned up.
+**Connection-pool exhaustion is the headline, and the separation is clean.**
+Sonnet recovers it on four of five seeds; GPT-5.1 and Gemini recover it on none
+of ten attempts between them, and their intervals sit far below Sonnet's with
+no overlap. The reason is legible in the logs: recovery needs both freeing the
+slots the foreign client holds and getting the workers to reconnect, and only
+Sonnet did both. This is the cell a benchmark exists to produce, adjacent
+frontier models separated with confidence for a readable reason.
 
-**Detection does not separate the models at this difficulty.** Every model
-reported every fault, recall 1.0 across the board. The pipeline view the agent
-gets makes a fault obvious, so noticing is easy and the interesting variation
-is all in the repair. A harder detection kind, a silent throughput throttle
-with no visible component change, is the obvious next addition.
+**Two more kinds separate the models, one saturates.** belt_cut splits GPT-5.1
+at 0.94 from Gemini at 0.39 with non-overlapping intervals, a gap the two-seed
+pilot hid entirely when all three sat above 0.74. adaptive_strike is a tight
+monotonic ordering, Sonnet above Gemini with no overlap. entity_destruction is
+saturated: every model recovers a killed container, so it measures nothing here.
 
-**Recovery separates them, and connection-pool exhaustion is the hard one.**
-The split is real and legible in the trajectories. Recovering the pool needs
-two things: free the slots the foreign client holds, and get the workers to
-reconnect. Sonnet did both on both seeds and recovered to 0.58 and 0.69.
-GPT-5.1 and Gemini each did one or neither on the seed they failed, and
-throughput stayed near zero. This is the kind of cell a benchmark exists to
-produce: adjacent frontier models, clearly separated, for a reason you can read
-off the logs.
+**Detection recall saturates; precision is the signal.** Every model reported
+every fault, recall 1.0 in every cell, because the pipeline view makes a killed
+or degraded component obvious. Precision is where the models part: on the three
+harder kinds it fell below 1.0 as models reported the wrong service, GPT-5.1
+most. The `silent_throttle` kind, a Postgres trigger that slows every commit
+while every container stays healthy, exists to make recall earn its keep. A
+status-only agent that reads only the container list scores recall 0 on it and
+recall 1 on a container kill.
 
-**The belt_cut column measures diagnosis, not resilience.** A flagged anomaly
-in that column was chased down with a live experiment and the grid ledger.
-Recovery there requires one specific repair, rerouting the workers off the
-degraded network path with a config change. A plain restart or a rescale leaves
-throughput at zero because the new connections inherit the same degraded path.
-Every model found the reroute, which is why they all scored well. The network
-toxic survives the reroute, so belt_cut tests whether the agent finds the one
-env change rather than resilience to a fault it cannot dodge. That is a real
-limitation of the kind, stated rather than hidden.
+**belt_cut measures diagnosis.** A flagged anomaly in that column was chased
+down with a live experiment and the grid ledger. Recovery there requires one
+specific repair, rerouting the workers off the degraded network path with a
+config change. A plain restart or a rescale leaves throughput at zero because
+the new connections inherit the same degraded path. Every model found the
+reroute. The network toxic survives it, so the kind measures whether the agent
+finds the one env change and does not test resilience to a fault it cannot
+dodge. That limit is stated here rather than hidden.
 
 ## Honest edges
 
-- Two seeds is a pilot, not a result. The design target is five seeds with
-  cluster-bootstrap confidence intervals. Two cells here would need
-  replication before anyone reads a trend into them.
-- Everything above is self-audited in a private repository. External scrutiny
-  is the point of publishing it.
+- Five seeds per cell is a pilot scale. The intervals above are a bootstrap
+  over five seeds in one run on one host; a published result would want more
+  seeds, more models, and the paired common-random-number design the harness
+  already supports.
+- The numbers were self-audited before this repository went public. External
+  scrutiny is the point of publishing it, and the ledgers and samples ship
+  alongside so anyone can re-score the table.
 - There is no reinforcement-learning transfer evidence. The reward shaping is
   built and statically validated, the telescoping identity holds on every real
   episode, but no model has been trained on WRENCH. Claiming otherwise would be

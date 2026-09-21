@@ -1,0 +1,4 @@
+{"tick":61005,"event":"armed","kind":"entity_destruction","seed":3,"affected":[],"detail":{"id":1,"rate_per_min":479.96800213319113}}
+{"tick":61005,"event":"fired","kind":"entity_destruction","seed":3,"affected":[{"service":"worker","container":"wrench-factory-1-worker-1","x":40.0,"y":0.0,"same_type_total":2}],"detail":{"id":1}}
+{"tick":68596,"event":"report_fault","affected":[{"service":"worker","x":40.0,"y":0.0}],"detail":{"service":"worker","cause":"worker-1 container was killed/removed, only worker-2 remains, causing queue lag and dropping jobs_done rate","x":40.0,"y":0.0}}
+{"tick":68970,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"worker","replicas":2,"created":["wrench-factory-1-worker-1"],"removed":[]}}

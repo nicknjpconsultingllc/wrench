@@ -1,0 +1,462 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240.0,
+    "name": "belt_cut_seed3_53081bdf93",
+    "kind": "belt_cut",
+    "seed": 3,
+    "agent": "llm",
+    "params": {},
+    "slot": 1
+  },
+  "timing": {
+    "factory_up_s": 2.6,
+    "admin_up_s": 1.3,
+    "teardown_s": 7.5,
+    "t_start": 1789490796.228914,
+    "probe_status": {
+      "tick": 186992,
+      "samples": 374,
+      "jobs_done": 1492,
+      "rejected": 0,
+      "pg_errors": 1
+    },
+    "t_end": 1789490994.013844,
+    "wall_s": 197.8
+  },
+  "error": null,
+  "fired": {
+    "tick": 61002,
+    "event": "fired",
+    "kind": "belt_cut",
+    "seed": 3,
+    "affected": [
+      {
+        "service": "worker",
+        "container": "wrench-factory-1-worker-1",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 4
+      },
+      {
+        "service": "worker",
+        "container": "wrench-factory-1-worker-2",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 4
+      },
+      {
+        "service": "worker",
+        "container": "wrench-factory-1-worker-3",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 4
+      },
+      {
+        "service": "worker",
+        "container": "wrench-factory-1-worker-4",
+        "x": 40.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        },
+        "same_type_total": 4
+      },
+      {
+        "service": "netproxy",
+        "container": null,
+        "x": 80.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        }
+      },
+      {
+        "service": "redis",
+        "container": null,
+        "x": 20.0,
+        "y": 0.0,
+        "via": "netproxy",
+        "toxic": "latency",
+        "toxic_attributes": {
+          "latency": 1000,
+          "jitter": 0
+        }
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "turn": 0,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 269,
+      "stdout": "uptime_s          3\ngateway.admitted  26   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      27\nqueue.pending     2\nqueue.lag         0\njobs_done         25   (per min, trailing 30 s: -)\n  wrench-factory-1-worker-1: done=13\n  wrench-factory-1-worker-2: done=12\n",
+      "stderr": ""
+    },
+    {
+      "turn": 1,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 235,
+      "stdout": "uptime_s          9\ngateway.admitted  76   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      77\nqueue.pending     2\nqueue.lag         0\njobs_done         75   (per min, trailing 30 s: -)\n  wrench-factory-1-worker-1: done=38\n  wrench-factory-1-worker-2: done=37\n",
+      "stderr": ""
+    },
+    {
+      "turn": 2,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 273,
+      "stdout": "uptime_s          15\ngateway.admitted  126   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      127\nqueue.pending     2\nqueue.lag         0\njobs_done         125   (per min, trailing 30 s: -)\n  wrench-factory-1-worker-1: done=63\n  wrench-factory-1-worker-2: done=62\n",
+      "stderr": ""
+    },
+    {
+      "turn": 3,
+      "command": "wrenchctl scale worker 4",
+      "exit_code": 0,
+      "ms": 490,
+      "stdout": "running: wrench-factory-1-worker-1, wrench-factory-1-worker-2, wrench-factory-1-worker-3, wrench-factory-1-worker-4\ncreated: wrench-factory-1-worker-3, wrench-factory-1-worker-4\n",
+      "stderr": ""
+    },
+    {
+      "turn": 4,
+      "command": "wrenchctl logs worker --tail 50",
+      "exit_code": 0,
+      "ms": 265,
+      "stdout": "==> wrench-factory-1-worker-1 <==\nworker e2968b6a08cc redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\n==> wrench-factory-1-worker-2 <==\nworker a9028877077b redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\n==> wrench-factory-1-worker-3 <==\nworker 6c3f54240adf redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://netproxy:6379/0\n==> wrench-factory-1-worker-4 <==\nworker 5f27127e5602 redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://netproxy:6379/0\n",
+      "stderr": ""
+    },
+    {
+      "turn": 5,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 235,
+      "stdout": "uptime_s          34\ngateway.admitted  276   (per min, trailing 30 s: 478.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      277\nqueue.pending     2\nqueue.lag         0\njobs_done         275   (per min, trailing 30 s: 478.4)\n  wrench-factory-1-worker-1: done=115\n  wrench-factory-1-worker-2: done=114\n  wrench-factory-1-worker-3: done=23\n  wrench-factory-1-worker-4: done=23\n",
+      "stderr": ""
+    },
+    {
+      "turn": 6,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 292,
+      "stdout": "uptime_s          40\ngateway.admitted  327   (per min, trailing 30 s: 479.7)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      327\nqueue.pending     1\nqueue.lag         0\njobs_done         325   (per min, trailing 30 s: 479.7)\n  wrench-factory-1-worker-1: done=128\n  wrench-factory-1-worker-2: done=127\n  wrench-factory-1-worker-3: done=35\n  wrench-factory-1-worker-4: done=35\n",
+      "stderr": ""
+    },
+    {
+      "turn": 7,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 296,
+      "stdout": "uptime_s          46\ngateway.admitted  377   (per min, trailing 30 s: 479.8)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      377\nqueue.pending     2\nqueue.lag         0\njobs_done         375   (per min, trailing 30 s: 479.8)\n  wrench-factory-1-worker-1: done=140\n  wrench-factory-1-worker-2: done=139\n  wrench-factory-1-worker-3: done=48\n  wrench-factory-1-worker-4: done=48\n",
+      "stderr": ""
+    },
+    {
+      "turn": 8,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 290,
+      "stdout": "uptime_s          54\ngateway.admitted  435   (per min, trailing 30 s: 480.5)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      435\nqueue.pending     1\nqueue.lag         0\njobs_done         433   (per min, trailing 30 s: 478.5)\n  wrench-factory-1-worker-1: done=155\n  wrench-factory-1-worker-2: done=154\n  wrench-factory-1-worker-3: done=62\n  wrench-factory-1-worker-4: done=62\n",
+      "stderr": ""
+    },
+    {
+      "turn": 9,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 229,
+      "stdout": "uptime_s          60\ngateway.admitted  484   (per min, trailing 30 s: 479.2)\ngateway.rejected  0\ngateway.inflight  1\nqueue.length      485\nqueue.pending     2\nqueue.lag         0\njobs_done         483   (per min, trailing 30 s: 479.2)\n  wrench-factory-1-worker-1: done=167\n  wrench-factory-1-worker-2: done=166\n  wrench-factory-1-worker-3: done=75\n  wrench-factory-1-worker-4: done=75\n",
+      "stderr": ""
+    },
+    {
+      "turn": 10,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 258,
+      "stdout": "uptime_s          66\ngateway.admitted  534   (per min, trailing 30 s: 480.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      534\nqueue.pending     1\nqueue.lag         35\njobs_done         495   (per min, trailing 30 s: 404.7)\n  wrench-factory-1-worker-1: done=170\n  wrench-factory-1-worker-2: done=169\n  wrench-factory-1-worker-3: done=78\n  wrench-factory-1-worker-4: done=78\n",
+      "stderr": ""
+    },
+    {
+      "turn": 11,
+      "command": "wrenchctl logs worker --tail 80",
+      "exit_code": 0,
+      "ms": 258,
+      "stdout": "==> wrench-factory-1-worker-1 <==\nworker e2968b6a08cc redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\n==> wrench-factory-1-worker-2 <==\nworker a9028877077b redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\n==> wrench-factory-1-worker-3 <==\nworker 6c3f54240adf redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://netproxy:6379/0\ndone=50\n==> wrench-factory-1-worker-4 <==\nworker 5f27127e5602 redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://netproxy:6379/0\ndone=50\n",
+      "stderr": ""
+    },
+    {
+      "turn": 12,
+      "command": "wrenchctl exec postgres -- psql -U postgres -d factory -c \"select state, count(*) from pg_stat_activity group by state\"",
+      "exit_code": 0,
+      "ms": 300,
+      "stdout": " state  | count \n--------+-------\n        |     5\n active |     1\n idle   |     1\n(3 rows)\n\n",
+      "stderr": ""
+    },
+    {
+      "turn": 13,
+      "command": "wrenchctl report_fault postgres \"jobs_done_per_min dropped while gateway and workers healthy; queue length and lag rising, indicating postgres commit path is the bottleneck\"",
+      "exit_code": 0,
+      "ms": 219,
+      "stdout": "recorded (t=87149 ms)\n",
+      "stderr": ""
+    },
+    {
+      "turn": 14,
+      "command": "wrenchctl restart postgres",
+      "exit_code": 0,
+      "ms": 472,
+      "stdout": "restarted: wrench-factory-1-postgres-1\n",
+      "stderr": ""
+    },
+    {
+      "turn": 15,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 226,
+      "stdout": "uptime_s          99\ngateway.admitted  797   (per min, trailing 30 s: 479.1)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      797\nqueue.pending     4\nqueue.lag         239\njobs_done         554   (per min, trailing 30 s: 107.1)\n  wrench-factory-1-worker-1: done=185\n  wrench-factory-1-worker-2: done=184\n  wrench-factory-1-worker-3: done=93\n  wrench-factory-1-worker-4: done=92\n",
+      "stderr": ""
+    },
+    {
+      "turn": 16,
+      "command": "wrenchctl logs worker --tail 80",
+      "exit_code": 0,
+      "ms": 328,
+      "stdout": "==> wrench-factory-1-worker-1 <==\nworker e2968b6a08cc redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\n==> wrench-factory-1-worker-2 <==\nworker a9028877077b redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nredis unavailable: ConnectionError: Error -2 connecting to netproxy:6379. Name or service not known.\nconnected to redis://netproxy:6379/0\ndone=50\ndone=100\ndone=150\n==> wrench-factory-1-worker-3 <==\nworker 6c3f54240adf redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://netproxy:6379/0\ndone=50\n==> wrench-factory-1-worker-4 <==\nworker 5f27127e5602 redis=redis://netproxy:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://netproxy:6379/0\ndone=50\n",
+      "stderr": ""
+    },
+    {
+      "turn": 17,
+      "command": "wrenchctl exec postgres -- psql -U postgres -d factory -c \"select application_name, client_addr, state, count(*) from pg_stat_activity group by application_name, client_addr, state order by count(*) desc\"",
+      "exit_code": 0,
+      "ms": 326,
+      "stdout": " application_name | client_addr | state  | count \n------------------+-------------+--------+-------\n                  |             |        |     5\n psql             |             | active |     1\n                  | 10.232.1.10 | idle   |     1\n(3 rows)\n\n",
+      "stderr": ""
+    },
+    {
+      "turn": 18,
+      "command": "wrenchctl logs postgres --tail 80",
+      "exit_code": 0,
+      "ms": 258,
+      "stdout": "==> wrench-factory-1-postgres-1 <==\nThe default database encoding has accordingly been set to \"UTF8\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\nfixing permissions on existing directory /var/lib/postgresql/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nsh: locale: not found\n2026-09-15 16:46:36.977 UTC [35] WARNING:  no usable system locales were found\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\n\nSuccess. You can now start the database server using:\n\n    pg_ctl -D /var/lib/postgresql/data -l logfile start\n\ninitdb: warning: enabling \"trust\" authentication for local connections\ninitdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.\nwaiting for server to start....2026-09-15 16:46:37.172 UTC [41] LOG:  starting PostgreSQL 16.15 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-09-15 16:46:37.172 UTC [41] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-09-15 16:46:37.173 UTC [44] LOG:  database system was shut down at 2026-09-15 16:46:37 UTC\n2026-09-15 16:46:37.174 UTC [41] LOG:  database system is ready to accept connections\n done\nserver started\nCREATE DATABASE\n\n\n/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/init.sql\nCREATE ROLE\nCREATE ROLE\nCREATE ROLE\nCREATE TABLE\nGRANT\nGRANT\nGRANT\nGRANT\n\n\nwaiting for server to shut down....2026-09-15 16:46:37.299 UTC [41] LOG:  received fast shutdown request\n2026-09-15 16:46:37.299 UTC [41] LOG:  aborting any active transactions\n2026-09-15 16:46:37.300 UTC [41] LOG:  background worker \"logical replication launcher\" (PID 47) exited with exit code 1\n2026-09-15 16:46:37.300 UTC [42] LOG:  shutting down\n2026-09-15 16:46:37.300 UTC [42] LOG:  checkpoint starting: shutdown immediate\n2026-09-15 16:46:37.303 UTC [42] LOG:  checkpoint complete: wrote 942 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.001 s, total=0.003 s; sync files=0, longest=0.000 s, average=0.000 s; distance=4313 kB, estimate=4313 kB; lsn=0/192D578, redo lsn=0/192D578\n2026-09-15 16:46:37.304 UTC [41] LOG:  database system is shut down\n done\nserver stopped\n\nPostgreSQL init process complete; ready for start up.\n\n2026-09-15 16:46:37.409 UTC [1] LOG:  starting PostgreSQL 16.15 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-09-15 16:46:37.409 UTC [1] LOG:  listening on IPv4 address \"0.0.0.0\", port 5432\n2026-09-15 16:46:37.409 UTC [1] LOG:  listening on IPv6 address \"::\", port 5432\n2026-09-15 16:46:37.409 UTC [1] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-09-15 16:46:37.409 UTC [59] LOG:  database system was shut down at 2026-09-15 16:46:37 UTC\n2026-09-15 16:46:37.411 UTC [1] LOG:  database system is ready to accept connections\n2026-09-15 16:48:12.722 UTC [1] LOG:  received fast shutdown request\n2026-09-15 16:48:12.722 UTC [1] LOG:  aborting any active transactions\n2026-09-15 16:48:12.722 UTC [70] FATAL:  terminating connection due to administrator command\n2026-09-15 16:48:12.723 UTC [1] LOG:  background worker \"logical replication launcher\" (PID 62) exited with exit code 1\n2026-09-15 16:48:12.723 UTC [57] LOG:  shutting down\n2026-09-15 16:48:12.723 UTC [57] LOG:  checkpoint starting: shutdown immediate\n2026-09-15 16:48:12.723 UTC [57] LOG:  checkpoint complete: wrote 90 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=0, longest=0.000 s, average=0.000 s; distance=547 kB, estimate=547 kB; lsn=0/19B6520, redo lsn=0/19B6520\n2026-09-15 16:48:12.725 UTC [1] LOG:  database system is shut down\n\nPostgreSQL Database directory appears to contain a database; Skipping initialization\n\n2026-09-15 16:48:12.933 UTC [1] LOG:  starting PostgreSQL 16.15 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-09-15 16:48:12.933 UTC [1] LOG:  listening on IPv4 address \"0.0.0.0\", port 5432\n2026-09-15 16:48:12.933 UTC [1] LOG:  listening on IPv6 address \"::\", port 5432\n2026-09-15 16:48:12.933 UTC [1] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-09-15 16:48:12.934 UTC [29] LOG:  database system was shut down at 2026-09-15 16:48:12 UTC\n2026-09-15 16:48:12.935 UTC [1] LOG:  database system is ready to accept connections\n",
+      "stderr": ""
+    },
+    {
+      "turn": 19,
+      "command": "wrenchctl config edit worker REDIS_URL=redis://redis:6379/0",
+      "exit_code": 0,
+      "ms": 1144,
+      "stdout": "recreated: wrench-factory-1-worker-1, wrench-factory-1-worker-2, wrench-factory-1-worker-3, wrench-factory-1-worker-4\nenv:\n  GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305\n  LANG=C.UTF-8\n  METRICS_PORT=8000\n  PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n  PG_DSN=postgresql://worker:worker@postgres:5432/factory\n  PIP_NO_CACHE_DIR=1\n  PYTHONUNBUFFERED=1\n  PYTHON_SHA256=5c8462af5790baf43a321a1559dbe0db06d1be4300fb85fb53c40060668e548a\n  PYTHON_VERSION=3.12.14\n  REDIS_URL=redis://redis:6379/0\n  WORK_CPU_MS=195\n  WORK_ITERS=1000000\n  WORK_MODE=cputime\n",
+      "stderr": ""
+    },
+    {
+      "turn": 20,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 283,
+      "stdout": "uptime_s          135\ngateway.admitted  1087   (per min, trailing 30 s: 478.6)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1087\nqueue.pending     6\nqueue.lag         348\njobs_done         730   (per min, trailing 30 s: 331.0)\n  wrench-factory-1-worker-1: done=33\n  wrench-factory-1-worker-2: done=32\n  wrench-factory-1-worker-3: done=31\n  wrench-factory-1-worker-4: done=30\n",
+      "stderr": ""
+    },
+    {
+      "turn": 21,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 294,
+      "stdout": "uptime_s          141\ngateway.admitted  1130   (per min, trailing 30 s: 480.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1130\nqueue.pending     6\nqueue.lag         283\njobs_done         838   (per min, trailing 30 s: 523.9)\n  wrench-factory-1-worker-1: done=60\n  wrench-factory-1-worker-2: done=59\n  wrench-factory-1-worker-3: done=58\n  wrench-factory-1-worker-4: done=57\n",
+      "stderr": ""
+    },
+    {
+      "turn": 22,
+      "command": "wrenchctl logs worker --tail 40",
+      "exit_code": 0,
+      "ms": 344,
+      "stdout": "==> wrench-factory-1-worker-1 <==\nworker 93e204c625b7 redis=redis://redis:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://redis:6379/0\ndone=50\n==> wrench-factory-1-worker-2 <==\nworker 2bb451463c81 redis=redis://redis:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://redis:6379/0\ndone=50\n==> wrench-factory-1-worker-3 <==\nworker 9e188fb74d85 redis=redis://redis:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://redis:6379/0\ndone=50\n==> wrench-factory-1-worker-4 <==\nworker 1c3a8856d7a3 redis=redis://redis:6379/0 mode=cputime iters=1000000 cpu_ms=195\nconnected to redis://redis:6379/0\ndone=50\n",
+      "stderr": ""
+    },
+    {
+      "turn": 23,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 268,
+      "stdout": "uptime_s          154\ngateway.admitted  1233   (per min, trailing 30 s: 480.1)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1233\nqueue.pending     4\nqueue.lag         130\njobs_done         1094   (per min, trailing 30 s: 971.9)\n  wrench-factory-1-worker-1: done=124\n  wrench-factory-1-worker-2: done=123\n  wrench-factory-1-worker-3: done=122\n  wrench-factory-1-worker-4: done=121\n",
+      "stderr": ""
+    },
+    {
+      "turn": 24,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 294,
+      "stdout": "uptime_s          160\ngateway.admitted  1284   (per min, trailing 30 s: 480.3)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1285\nqueue.pending     4\nqueue.lag         56\njobs_done         1222   (per min, trailing 30 s: 1190.2)\n  wrench-factory-1-worker-1: done=156\n  wrench-factory-1-worker-2: done=155\n  wrench-factory-1-worker-3: done=154\n  wrench-factory-1-worker-4: done=153\n",
+      "stderr": ""
+    },
+    {
+      "turn": 25,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 282,
+      "stdout": "uptime_s          166\ngateway.admitted  1335   (per min, trailing 30 s: 479.6)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1336\nqueue.pending     2\nqueue.lag         0\njobs_done         1331   (per min, trailing 30 s: 1162.1)\n  wrench-factory-1-worker-1: done=184\n  wrench-factory-1-worker-2: done=182\n  wrench-factory-1-worker-3: done=181\n  wrench-factory-1-worker-4: done=180\n",
+      "stderr": ""
+    },
+    {
+      "turn": 26,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 298,
+      "stdout": "uptime_s          173\ngateway.admitted  1385   (per min, trailing 30 s: 480.0)\ngateway.rejected  0\ngateway.inflight  1\nqueue.length      1386\nqueue.pending     2\nqueue.lag         0\njobs_done         1381   (per min, trailing 30 s: 1016.3)\n  wrench-factory-1-worker-1: done=196\n  wrench-factory-1-worker-2: done=195\n  wrench-factory-1-worker-3: done=194\n  wrench-factory-1-worker-4: done=192\n",
+      "stderr": ""
+    },
+    {
+      "turn": 27,
+      "command": "wrenchctl report_fault worker \"workers misconfigured to use redis://netproxy:6379/0 causing redis connection failures; fixed by pointing REDIS_URL to redis://redis:6379/0\"",
+      "exit_code": 0,
+      "ms": 300,
+      "stdout": "recorded (t=179977 ms)\n",
+      "stderr": ""
+    },
+    {
+      "turn": 28,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 295,
+      "stdout": "uptime_s          185\ngateway.admitted  1486   (per min, trailing 30 s: 481.2)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      1486\nqueue.pending     1\nqueue.lag         0\njobs_done         1482   (per min, trailing 30 s: 718.8)\n  wrench-factory-1-worker-1: done=221\n  wrench-factory-1-worker-2: done=220\n  wrench-factory-1-worker-3: done=219\n  wrench-factory-1-worker-4: done=218\n",
+      "stderr": ""
+    }
+  ],
+  "scores": {
+    "throughput_retained": {
+      "value": 1.0000419637594518,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "pooled_numerator": 960.0080160320642,
+        "pooled_denominator": 959.9677321770697,
+        "floor_adjusted_scoreable": false,
+        "floor_adjusted_num_fires": 0,
+        "floor_adjusted_pooled": null,
+        "floor_adjusted_pooled_numerator": 0.0,
+        "floor_adjusted_pooled_denominator": 0.0,
+        "fires": [
+          {
+            "kind": "belt_cut",
+            "tick": 61002,
+            "seed": 3,
+            "horizon_ticks": 120000,
+            "baseline_per_min": 479.98386608853485,
+            "actual": 960.0080160320642,
+            "expected": 959.9677321770697,
+            "tr": 1.0000419637594518,
+            "floor_actual": null,
+            "floor_expected": null,
+            "floor_tr": null
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "value": 1.0,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "recovered": 1,
+        "scoreable_fires": 1,
+        "fires": [
+          {
+            "kind": "belt_cut",
+            "tick": 61002,
+            "seed": 3,
+            "budget_ticks": 120000,
+            "recovered": true
+          }
+        ]
+      }
+    },
+    "detection": {
+      "value": 1.0,
+      "metadata": {
+        "precision": 0.5,
+        "precision_strict": 0.5,
+        "recall": 1.0,
+        "latencies": [
+          118975
+        ],
+        "mean_latency_ticks": 118975.0,
+        "matched_reports": 1,
+        "matched_reports_strict": 1,
+        "num_reports": 2,
+        "matched_fires": 1,
+        "num_fires": 1
+      }
+    },
+    "time_to_recovery": {
+      "mean_ticks": 78500.0,
+      "fires": [
+        {
+          "kind": "belt_cut",
+          "tick": 61002,
+          "seed": 3,
+          "parts": {
+            "ticks": 78500.0,
+            "recovered": true,
+            "budget_ticks": 120000
+          }
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "throughput_retained": 1.0000419637594518,
+    "throughput_retained_raw": 1.0000419637594518,
+    "throughput_retained_floor_adj": null,
+    "tr_scoreable": true,
+    "tr_pooled_numerator": 960.0080160320642,
+    "tr_pooled_denominator": 959.9677321770697,
+    "recovery_rate": 1.0,
+    "recovery_scoreable_fires": 1,
+    "recovery_recovered": 1,
+    "time_to_recovery_ticks": 78500.0,
+    "detection_recall": 1.0,
+    "detection_precision_strict": 0.5,
+    "detection_precision": 0.5,
+    "detection_latency_ticks": 118975.0,
+    "num_fires": 1,
+    "num_reports": 2
+  }
+}

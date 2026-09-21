@@ -1,0 +1,5 @@
+{"tick":39498,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"redis","cmd":["redis-cli","INFO"],"exit_code":0}}
+{"tick":61001,"event":"armed","kind":"entity_destruction","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":480.9919834669422}}
+{"tick":61001,"event":"fired","kind":"entity_destruction","seed":1,"affected":[{"service":"gateway","container":"wrench-factory-1-gateway-1","x":0.0,"y":0.0,"same_type_total":1}],"detail":{"id":1}}
+{"tick":71748,"event":"report_fault","affected":[{"service":"gateway","x":0.0,"y":0.0}],"detail":{"service":"gateway","cause":"container is gone, confirmed by missing ps entry and unreachable metric","x":0.0,"y":0.0}}
+{"tick":78099,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"gateway","replicas":1,"created":["wrench-factory-1-gateway-1"],"removed":[]}}

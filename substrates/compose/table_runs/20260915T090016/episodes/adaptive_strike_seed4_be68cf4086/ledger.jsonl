@@ -1,0 +1,10 @@
+{"tick":61000,"event":"armed","kind":"adaptive_strike","seed":4,"affected":[],"detail":{"id":1,"rate_per_min":481.0}}
+{"tick":61000,"event":"fired","kind":"adaptive_strike","seed":4,"affected":[{"service":"redis","container":"wrench-factory-0-redis-1","x":20.0,"y":0.0,"holder":"redis","load_bearing":1.0,"scores":{"gateway":1.0,"redis":1.0,"worker:a1a68ef9f9f0":0.25,"worker:d247799dde42":0.25},"flow":{"gateway":80.0,"redis":80.0,"worker:a1a68ef9f9f0":40.0,"worker:d247799dde42":40.0},"inflight_all":{"gateway":0.0,"redis":0.0,"worker:a1a68ef9f9f0":20.0,"worker:d247799dde42":0.0,"postgres":0.0},"same_type_total":1}],"detail":{"id":1}}
+{"tick":75314,"event":"report_fault","affected":[{"service":"redis","x":20.0,"y":0.0}],"detail":{"service":"redis","cause":"container is missing from ps output and metrics report redis as unreachable","x":20.0,"y":0.0}}
+{"tick":81663,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"redis","replicas":1,"created":["wrench-factory-0-redis-1"],"removed":[]}}
+{"tick":101121,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"gateway","containers":["wrench-factory-0-gateway-1"]}}
+{"tick":124321,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":138132,"event":"report_fault","affected":[{"service":"worker","x":40.0,"y":0.0}],"detail":{"service":"worker","cause":"worker-1 is silently slowed, processing significantly fewer jobs than worker-2","x":40.0,"y":0.0}}
+{"tick":164623,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":179258,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"worker","replicas":1,"created":[],"removed":["wrench-factory-0-worker-2"]}}
+{"tick":185641,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"worker","replicas":2,"created":["wrench-factory-0-worker-2"],"removed":[]}}

@@ -1,0 +1,9 @@
+{"tick":61000,"event":"armed","kind":"resource_exhaustion","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":480.0}}
+{"tick":61000,"event":"fired","kind":"resource_exhaustion","seed":1,"affected":[{"service":"postgres","container":"wrench-factory-0-postgres-1","x":60.0,"y":0.0,"hog":"wrench-admin-0-pghog","hog_connections":16,"same_type_total":1}],"detail":{"id":1}}
+{"tick":75203,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"worker","cmd":["ping","-c","3","redis"],"exit_code":127}}
+{"tick":86603,"event":"agent_action","affected":[],"detail":{"action":"exec","service":"worker","cmd":["redis-cli","-h","redis","PING"],"exit_code":127}}
+{"tick":110168,"event":"report_fault","affected":[{"service":"worker","x":40.0,"y":0.0}],"detail":{"service":"worker","cause":"workers cannot connect to redis; DNS lookup for 'netproxy' fails","x":40.0,"y":0.0}}
+{"tick":117000,"event":"agent_action","affected":[],"detail":{"action":"config","service":"worker","env":{"REDIS_URL":"redis://redis:6379/0"},"recreated":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}
+{"tick":140957,"event":"report_fault","affected":[{"service":"postgres","x":60.0,"y":0.0}],"detail":{"service":"postgres","cause":"refusing connections from workers, possibly due to exhausted connection pool","x":60.0,"y":0.0}}
+{"tick":148353,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"postgres","containers":["wrench-factory-0-postgres-1"]}}
+{"tick":173821,"event":"agent_action","affected":[],"detail":{"action":"restart","service":"worker","containers":["wrench-factory-0-worker-1","wrench-factory-0-worker-2"]}}

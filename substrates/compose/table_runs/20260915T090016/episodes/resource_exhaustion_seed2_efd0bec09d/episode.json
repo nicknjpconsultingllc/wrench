@@ -1,0 +1,315 @@
+{
+  "config": {
+    "window_ms": 120000,
+    "quota_per_min": 400.0,
+    "quota_fraction": 1.0,
+    "consecutive_windows": 2,
+    "precondition_window_ms": 60000,
+    "workers": 2,
+    "rps": 8.0,
+    "work_iters": 1000000,
+    "work_mode": "cputime",
+    "work_cpu_ms": 195,
+    "image": "wrench-svc:local",
+    "agent_image": "wrench-agent:local",
+    "sample_ms": 500,
+    "fire_timeout_s": 240.0,
+    "name": "resource_exhaustion_seed2_efd0bec09d",
+    "kind": "resource_exhaustion",
+    "seed": 2,
+    "agent": "llm",
+    "params": {},
+    "slot": 1
+  },
+  "timing": {
+    "factory_up_s": 2.3,
+    "admin_up_s": 1.2,
+    "teardown_s": 7.3,
+    "t_start": 1789489006.617072,
+    "probe_status": {
+      "tick": 190867,
+      "samples": 382,
+      "jobs_done": 490,
+      "rejected": 0,
+      "pg_errors": 198
+    },
+    "t_end": 1789489207.76031,
+    "wall_s": 201.1
+  },
+  "error": null,
+  "fired": {
+    "tick": 61002,
+    "event": "fired",
+    "kind": "resource_exhaustion",
+    "seed": 2,
+    "affected": [
+      {
+        "service": "postgres",
+        "container": "wrench-factory-1-postgres-1",
+        "x": 60.0,
+        "y": 0.0,
+        "hog": "wrench-admin-1-pghog",
+        "hog_connections": 16,
+        "same_type_total": 1
+      }
+    ],
+    "detail": {
+      "id": 1
+    }
+  },
+  "agent_actions": [
+    {
+      "turn": 0,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 230,
+      "stdout": "uptime_s          8\ngateway.admitted  68   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      68\nqueue.pending     1\nqueue.lag         0\njobs_done         67   (per min, trailing 30 s: -)\n  wrench-factory-1-worker-1: done=34\n  wrench-factory-1-worker-2: done=33\n",
+      "stderr": ""
+    },
+    {
+      "turn": 1,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 244,
+      "stdout": "uptime_s          17\ngateway.admitted  143   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      143\nqueue.pending     1\nqueue.lag         0\njobs_done         142   (per min, trailing 30 s: -)\n  wrench-factory-1-worker-1: done=71\n  wrench-factory-1-worker-2: done=71\n",
+      "stderr": ""
+    },
+    {
+      "turn": 2,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 276,
+      "stdout": "uptime_s          25\ngateway.admitted  201   (per min, trailing 30 s: -)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      201\nqueue.pending     1\nqueue.lag         0\njobs_done         200   (per min, trailing 30 s: -)\n  wrench-factory-1-worker-1: done=100\n  wrench-factory-1-worker-2: done=100\n",
+      "stderr": ""
+    },
+    {
+      "turn": 3,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 250,
+      "stdout": "uptime_s          33\ngateway.admitted  268   (per min, trailing 30 s: 481.0)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      268\nqueue.pending     2\nqueue.lag         0\njobs_done         266   (per min, trailing 30 s: 479.0)\n  wrench-factory-1-worker-1: done=133\n  wrench-factory-1-worker-2: done=133\n",
+      "stderr": ""
+    },
+    {
+      "turn": 4,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 280,
+      "stdout": "uptime_s          44\ngateway.admitted  359   (per min, trailing 30 s: 479.8)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      359\nqueue.pending     1\nqueue.lag         0\njobs_done         358   (per min, trailing 30 s: 479.8)\n  wrench-factory-1-worker-1: done=179\n  wrench-factory-1-worker-2: done=179\n",
+      "stderr": ""
+    },
+    {
+      "turn": 5,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 238,
+      "stdout": "uptime_s          54\ngateway.admitted  434   (per min, trailing 30 s: 479.4)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      434\nqueue.pending     1\nqueue.lag         0\njobs_done         433   (per min, trailing 30 s: 479.4)\n  wrench-factory-1-worker-1: done=217\n  wrench-factory-1-worker-2: done=216\n",
+      "stderr": ""
+    },
+    {
+      "turn": 6,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 227,
+      "stdout": "uptime_s          61\ngateway.admitted  492   (per min, trailing 30 s: 479.8)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      492\nqueue.pending     2\nqueue.lag         0\njobs_done         490   (per min, trailing 30 s: 477.8)\n  wrench-factory-1-worker-1: done=245\n  wrench-factory-1-worker-2: done=245\n",
+      "stderr": ""
+    },
+    {
+      "turn": 7,
+      "command": "wrenchctl exec postgres -- psql -U postgres -d factory -c 'SELECT state, query, backend_type, wait_event_type, wait_event FROM pg_stat_activity;'",
+      "exit_code": 0,
+      "ms": 363,
+      "stdout": " state  |                                         query                                         |         backend_type         | wait_event_type |     wait_event      \n--------+---------------------------------------------------------------------------------------+------------------------------+-----------------+---------------------\n        |                                                                                       | autovacuum launcher          | Activity        | AutoVacuumMain\n        |                                                                                       | logical replication launcher | Activity        | LogicalLauncherMain\n idle   | SELECT seq, job_id, sig FROM jobs_done WHERE seq > $1 ORDER BY seq                    | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n idle   | SELECT 1                                                                              | client backend               | Client          | ClientRead\n active | SELECT state, query, backend_type, wait_event_type, wait_event FROM pg_stat_activity; | client backend               |                 | \n        |                                                                                       | background writer            | Activity        | BgWriterMain\n        |                                                                                       | checkpointer                 | Activity        | CheckpointerMain\n        |                                                                                       | walwriter                    | Activity        | WalWriterMain\n(23 rows)\n\n",
+      "stderr": ""
+    },
+    {
+      "turn": 8,
+      "command": "wrenchctl report_fault postgres 'connection slots exhausted by foreign client'",
+      "exit_code": 0,
+      "ms": 253,
+      "stdout": "recorded (t=85531 ms)\n",
+      "stderr": ""
+    },
+    {
+      "turn": 9,
+      "command": "wrenchctl restart postgres",
+      "exit_code": 0,
+      "ms": 457,
+      "stdout": "restarted: wrench-factory-1-postgres-1\n",
+      "stderr": ""
+    },
+    {
+      "turn": 10,
+      "command": "wrenchctl metrics",
+      "exit_code": 0,
+      "ms": 270,
+      "stdout": "uptime_s          98\ngateway.admitted  786   (per min, trailing 30 s: 480.0)\ngateway.rejected  0\ngateway.inflight  0\nqueue.length      786\nqueue.pending     2\nqueue.lag         294\njobs_done         490   (per min, trailing 30 s: 0.0)\n  wrench-factory-1-worker-1: done=245\n  wrench-factory-1-worker-2: done=245\n",
+      "stderr": ""
+    },
+    {
+      "turn": 11,
+      "command": "wrenchctl restart worker",
+      "exit_code": 0,
+      "ms": 10619,
+      "stdout": "restarted: wrench-factory-1-worker-1, wrench-factory-1-worker-2\n",
+      "stderr": ""
+    },
+    {
+      "turn": 12,
+      "command": "wrenchctl exec postgres -- psql -U postgres -d factory -c 'SELECT state, wait_event FROM pg_stat_activity WHERE backend_type = '\\''client backend'\\'';'",
+      "exit_code": 0,
+      "ms": 286,
+      "stdout": " state  | wait_event \n--------+------------\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n idle   | ClientRead\n active | \n(18 rows)\n\n",
+      "stderr": ""
+    },
+    {
+      "turn": 13,
+      "command": "wrenchctl exec worker -- ping -c 4 postgres",
+      "exit_code": 127,
+      "ms": 336,
+      "stdout": "OCI runtime exec failed: exec failed: unable to start container process: exec: \"ping\": executable file not found in $PATH\n",
+      "stderr": ""
+    },
+    {
+      "turn": 14,
+      "command": "wrenchctl exec worker -- nc -zv postgres 5432",
+      "exit_code": 127,
+      "ms": 291,
+      "stdout": "OCI runtime exec failed: exec failed: unable to start container process: exec: \"nc\": executable file not found in $PATH\n",
+      "stderr": ""
+    },
+    {
+      "turn": 15,
+      "command": "import socket;",
+      "exit_code": 127,
+      "ms": 63,
+      "stdout": "",
+      "stderr": "sh: 1: import: not found\n"
+    },
+    {
+      "turn": 16,
+      "command": "wrenchctl logs worker --tail 20",
+      "exit_code": 0,
+      "ms": 282,
+      "stdout": "==> wrench-factory-1-worker-1 <==\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\n==> wrench-factory-1-worker-2 <==\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\npg insert failed (OperationalError: connection failed: connection to server at \"10.232.1.3\", port 5432 failed: FATAL); retrying\n",
+      "stderr": ""
+    },
+    {
+      "turn": 17,
+      "command": "wrenchctl logs postgres --tail 20",
+      "exit_code": 0,
+      "ms": 307,
+      "stdout": "==> wrench-factory-1-postgres-1 <==\n2026-09-15 16:19:49.972 UTC [1453] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.027 UTC [1454] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.135 UTC [1455] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.243 UTC [1456] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.352 UTC [1457] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.465 UTC [1458] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.469 UTC [1459] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.572 UTC [1460] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.682 UTC [1461] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.795 UTC [1462] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.819 UTC [1463] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.908 UTC [1464] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:50.974 UTC [1465] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:51.019 UTC [1466] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:51.129 UTC [1471] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:51.236 UTC [1475] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:51.346 UTC [1476] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:51.451 UTC [1477] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:51.467 UTC [1478] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n2026-09-15 16:19:51.555 UTC [1479] FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute\n",
+      "stderr": ""
+    },
+    {
+      "turn": 18,
+      "command": "wrenchctl config edit postgres max_connections=200",
+      "exit_code": 0,
+      "ms": 479,
+      "stdout": "recreated: wrench-factory-1-postgres-1\nenv:\n  DOCKER_PG_LLVM_DEPS=llvm21-dev \t\tclang21\n  GOSU_VERSION=1.19\n  LANG=en_US.utf8\n  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n  PGDATA=/var/lib/postgresql/data\n  PG_MAJOR=16\n  PG_SHA256=c1575341fa7bd40f5274ea465b34390f4dc64cdd0770af327005caaeb9f6b7ed\n  PG_VERSION=16.15\n  POSTGRES_DB=factory\n  POSTGRES_PASSWORD=factory\n  max_connections=200\n",
+      "stderr": ""
+    }
+  ],
+  "scores": {
+    "throughput_retained": {
+      "value": 0.0031251050420168067,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "pooled_numerator": 3.0,
+        "pooled_denominator": 959.9677321770697,
+        "floor_adjusted_scoreable": false,
+        "floor_adjusted_num_fires": 0,
+        "floor_adjusted_pooled": null,
+        "floor_adjusted_pooled_numerator": 0.0,
+        "floor_adjusted_pooled_denominator": 0.0,
+        "fires": [
+          {
+            "kind": "resource_exhaustion",
+            "tick": 61002,
+            "seed": 2,
+            "horizon_ticks": 120000,
+            "baseline_per_min": 479.98386608853485,
+            "actual": 3.0,
+            "expected": 959.9677321770697,
+            "tr": 0.0031251050420168067,
+            "floor_actual": null,
+            "floor_expected": null,
+            "floor_tr": null
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "value": 0.0,
+      "metadata": {
+        "scoreable": true,
+        "item": "jobs_done",
+        "num_fires": 1,
+        "recovered": 0,
+        "scoreable_fires": 1,
+        "fires": [
+          {
+            "kind": "resource_exhaustion",
+            "tick": 61002,
+            "seed": 2,
+            "budget_ticks": 120000,
+            "recovered": false
+          }
+        ]
+      }
+    },
+    "detection": {
+      "value": 1.0,
+      "metadata": {
+        "precision": 1.0,
+        "precision_strict": 1.0,
+        "recall": 1.0,
+        "latencies": [
+          24529
+        ],
+        "mean_latency_ticks": 24529.0,
+        "matched_reports": 1,
+        "matched_reports_strict": 1,
+        "num_reports": 1,
+        "matched_fires": 1,
+        "num_fires": 1
+      }
+    },
+    "time_to_recovery": {
+      "mean_ticks": 120000.0,
+      "fires": [
+        {
+          "kind": "resource_exhaustion",
+          "tick": 61002,
+          "seed": 2,
+          "parts": {
+            "ticks": 120000.0,
+            "recovered": false,
+            "budget_ticks": 120000
+          }
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "throughput_retained": 0.0031251050420168067,
+    "throughput_retained_raw": 0.0031251050420168067,
+    "throughput_retained_floor_adj": null,
+    "tr_scoreable": true,
+    "tr_pooled_numerator": 3.0,
+    "tr_pooled_denominator": 959.9677321770697,
+    "recovery_rate": 0.0,
+    "recovery_scoreable_fires": 1,
+    "recovery_recovered": 0,
+    "time_to_recovery_ticks": 120000.0,
+    "detection_recall": 1.0,
+    "detection_precision_strict": 1.0,
+    "detection_precision": 1.0,
+    "detection_latency_ticks": 24529.0,
+    "num_fires": 1,
+    "num_reports": 1
+  }
+}

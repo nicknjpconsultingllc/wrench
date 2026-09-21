@@ -1,0 +1,8 @@
+{"tick":61000,"event":"armed","kind":"entity_destruction","seed":1,"affected":[],"detail":{"id":1,"rate_per_min":482.0}}
+{"tick":61000,"event":"fired","kind":"entity_destruction","seed":1,"affected":[{"service":"gateway","container":"wrench-factory-1-gateway-1","x":0.0,"y":0.0,"same_type_total":1}],"detail":{"id":1}}
+{"tick":66934,"event":"report_fault","affected":[{"service":"gateway","x":0.0,"y":0.0}],"detail":{"service":"gateway","cause":"gateway container is missing from ps (service unreachable)","x":0.0,"y":0.0}}
+{"tick":73326,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"gateway","replicas":1,"created":["wrench-factory-1-gateway-1"],"removed":[]}}
+{"tick":86856,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"gateway","replicas":2,"created":["wrench-factory-1-gateway-2"],"removed":[]}}
+{"tick":112069,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"worker","replicas":3,"created":["wrench-factory-1-worker-3"],"removed":[]}}
+{"tick":125170,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"gateway","replicas":1,"created":[],"removed":["wrench-factory-1-gateway-2"]}}
+{"tick":175469,"event":"agent_action","affected":[],"detail":{"action":"scale","service":"worker","replicas":4,"created":["wrench-factory-1-worker-4"],"removed":[]}}
